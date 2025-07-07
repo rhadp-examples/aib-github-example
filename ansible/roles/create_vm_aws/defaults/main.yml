@@ -1,0 +1,16 @@
+---
+# defaults
+instance_type: "m6g.xlarge" # ARM-based instance type
+
+# VPC Configuration
+vpc_name: "rhel-arm-vpc"
+vpc_cidr: "10.0.0.0/16"
+
+# Subnet Configuration
+subnet_name: "rhel-arm-subnet"
+subnet_cidr: "10.0.1.0/24"
+
+security_group_name: "rhel-arm-sg"
+security_group_description: "Security group for RHEL ARM instance"
+instance_name: "rhel-arm-instance"
+keypair_name: "rhel-arm-keypair"

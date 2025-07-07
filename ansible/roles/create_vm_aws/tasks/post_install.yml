@@ -1,0 +1,10 @@
+# Implement your post-install deployment tasks here
+# -------------------------------------------------
+
+- name: Show instance details
+  debug:
+    msg: "Public DNS Name: {{ ec2.instances[0].public_dns_name }}"
+
+- name: Show instance details
+  debug:
+    msg: "Public IP: {{ ec2.instances[0].public_ip_address }}"

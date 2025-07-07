@@ -1,0 +1,25 @@
+# Implement your install deployment tasks here
+# -------------------------------------------------
+
+- name: create ec2 instance
+  amazon.aws.ec2_instance:
+    instance_type: "{{ instance_type }}"
+    image_id: "{{ aws_image_id }}"
+    vpc_subnet_id: "{{ subnet.subnet.id }}"
+    security_group: "{{ security_group.group_id }}"
+    key_name: "{{ keypair_name }}"
+    network_interfaces:
+      - assign_public_ip: true
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          volume_size: 20
+          delete_on_termination: true
+    tags:
+      Name: "{{ instance_name }}"
+    wait: yes
+    count: 1
+    aws_access_key: "{{ aws_access_key_id }}"
+    aws_secret_key: "{{ aws_secret_access_key }}"
+    region: "{{ aws_default_region }}"
+  register: ec2
