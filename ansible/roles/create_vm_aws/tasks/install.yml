@@ -13,7 +13,12 @@
     volumes:
       - device_name: /dev/sda1
         ebs:
-          volume_size: 20
+          volume_size: "{{ boot_volume_size }}"
+          delete_on_termination: true
+      - device_name: /dev/sdb
+        ebs:
+          volume_size: "{{ additional_volume_size }}"
+          volume_type: gp3
           delete_on_termination: true
     tags:
       Name: "{{ instance_name }}"
@@ -23,3 +28,17 @@
     aws_secret_key: "{{ aws_secret_access_key }}"
     region: "{{ aws_default_region }}"
   register: ec2
+
+- name: wait for ssh to be available on the new instance
+  wait_for:
+    host: "{{ ec2.instances[0].public_ip_address }}"
+    port: 22
+    delay: 10
+    timeout: 300
+    state: started
+
+- name: add host key to known_hosts
+  known_hosts:
+    name: "{{ ec2.instances[0].public_ip_address }}"
+    key: "{{ lookup('pipe', 'ssh-keyscan -H ' + ec2.instances[0].public_ip_address) }}"
+    state: present

@@ -1,10 +1,79 @@
 # Implement your post-install deployment tasks here
 # -------------------------------------------------
 
-- name: Show instance details
-  debug:
-    msg: "Public DNS Name: {{ ec2.instances[0].public_dns_name }}"
+- name: list available block devices
+  command: lsblk
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  register: block_devices
 
-- name: Show instance details
+- name: show available block devices
   debug:
-    msg: "Public IP: {{ ec2.instances[0].public_ip_address }}"
+    var: block_devices.stdout_lines
+
+- name: find the root device
+  shell: lsblk -rno NAME,MOUNTPOINT | grep '/$' | cut -d' ' -f1 | sed 's/[0-9]*$//'
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  register: root_device
+  become: yes
+
+- name: find all disk devices
+  shell: lsblk -rno NAME,SIZE,TYPE | grep disk | awk '{print $1}'
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  register: all_devices
+  become: yes
+
+- name: find the additional storage device
+  shell: lsblk -rno NAME,SIZE,TYPE | grep disk | grep -v "{{ root_device.stdout }}" | head -1 | awk '{print $1}'
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  register: additional_device_result
+  become: yes
+
+- name: set additional device name
+  set_fact:
+    additional_device_name: "{{ additional_device_result.stdout }}"
+  when: additional_device_result.stdout != ""
+
+- name: show additional device found
+  debug:
+    var: additional_device_name
+
+- name: create filesystem on additional storage device
+  filesystem:
+    fstype: ext4
+    dev: "/dev/{{ additional_device_name }}"
+    force: no
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: yes
+  when: additional_device_name is defined
+
+- name: create mount point directory
+  file:
+    path: /mnt/data
+    state: directory
+    mode: '0755'
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: yes
+
+- name: mount additional storage device
+  mount:
+    path: /mnt/data
+    src: "/dev/{{ additional_device_name }}"
+    fstype: ext4
+    state: mounted
+    opts: defaults
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: yes
+  when: additional_device_name is defined
+
+- name: set proper ownership on mount point
+  file:
+    path: /mnt/data
+    owner: root
+    group: root
+    mode: '0755'
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: yes
+
+- name: show login command
+  debug:
+    msg: "ssh -i {{ ansible_ssh_private_key_file }} {{ ansible_user }}@{{ ec2.instances[0].public_dns_name }}"

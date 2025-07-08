@@ -1,6 +1,8 @@
 ---
 # defaults
 instance_type: "m6g.xlarge" # ARM-based instance type
+boot_volume_size: 20
+additional_volume_size: 100
 
 # VPC Configuration
 vpc_name: "rhel-arm-vpc"
