@@ -21,6 +21,7 @@ jobs:
       - name: build the application
         run: |
           echo "building the application..."
+          pwd
           cd src
           cmake .
           make
