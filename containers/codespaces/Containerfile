@@ -1,4 +1,22 @@
-FROM registry.access.redhat.com/ubi9/ubi:9.6
+FROM ghcr.io/astral-sh/uv:latest AS uv
 
-RUN dnf install -y cmake make g++ && \
-    dnf clean all
+FROM quay.io/centos/centos:stream9
+
+COPY --from=uv /uv /uvx /bin/
+
+RUN dnf install -y epel-release && \
+    dnf install -y compat-openssl11 libbrotli && \
+    dnf install -y cmake make g++ git clang-tools-extra && \
+    dnf install -y python3.12 python3-pip && \
+    dnf install -y socat vsomeip3 vsomeip3-devel vsomeip3-routingmanager dlt-daemon dlt-tools dlt-libs dlt-libs-devel && \
+    dnf install -y boost-devel boost-system boost-thread boost-log boost-chrono boost-date-time boost-atomic boost-filesystem boost-regex && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf
+
+# install jumpstarter
+ENV UV_PYTHON=python3.12 VIRTUAL_ENV=/jumpstarter
+
+RUN uv venv /jumpstarter && \
+    uv pip install "git+https://github.com/jumpstarter-dev/jumpstarter#subdirectory=packages/jumpstarter-all"
+
+ENV PATH="/jumpstarter/bin:$PATH"
