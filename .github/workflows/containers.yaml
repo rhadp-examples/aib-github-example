@@ -72,23 +72,6 @@ jobs:
       #    registry: ${{ env.REGISTRY }}
       #    username: ${{ secrets.QUAY_USERNAME }}
       #    password: ${{ secrets.QUAY_TOKEN }}
-
-      - name: setup qemu emulation
-        run: |
-          # Setup QEMU emulation for cross-architecture builds using containerized approach
-          echo "Setting up QEMU emulation for cross-architecture builds..."
-          
-          # Register binfmt handlers for cross-architecture support (no package installation needed)
-          echo "Registering binfmt handlers using containerized QEMU..."
-          sudo podman run --rm --privileged docker.io/tonistiigi/binfmt --install all
-          
-          # Verify setup
-          echo "Verifying QEMU emulation setup..."
-          ls -la /proc/sys/fs/binfmt_misc/ | grep -E "(qemu|binfmt)" || echo "No QEMU binfmt handlers found"
-          
-          # Test if we can run a simple command for different architecture
-          echo "Testing cross-architecture support..."
-          podman run --rm --platform linux/amd64 alpine:latest uname -m || echo "AMD64 emulation test failed"
           
       - name: build the container
         uses: redhat-actions/buildah-build@v2
@@ -99,7 +82,23 @@ jobs:
           containerfiles: "containers/${{ matrix.name }}/Containerfile"
           archs: arm64
 
-      #- name: login to quay.io
+      - name: Push To quay.io
+        id: push
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+          tags: ${{ steps.set-tags.outputs.tags }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+          
+      - name: generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
       #  uses: docker/login-action@v3
       #  with:
       #  registry: quay.io
