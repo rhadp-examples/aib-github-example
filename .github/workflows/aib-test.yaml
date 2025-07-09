@@ -9,7 +9,7 @@ on:
       - develop
 
 jobs:
-  test:
+  build_radio_app:
     runs-on: [self-hosted, Linux, ARM64]
     
     steps:
