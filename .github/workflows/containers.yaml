@@ -59,12 +59,12 @@ jobs:
           TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="$TAGS,${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
+            TAGS="$TAGS ${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
           fi
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="$TAGS,${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
+            TAGS="$TAGS ${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
           fi
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
@@ -75,7 +75,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_TOKEN }}
-          #auth_file_path: ${{ env.REGISTRY_AUTH_FILE }}
           
       - name: build the container
         uses: redhat-actions/buildah-build@v2
@@ -87,7 +86,7 @@ jobs:
           layers: true
           archs: arm64
 
-      - name: Push To quay.io
+      - name: push to registry
         id: push
         uses: redhat-actions/push-to-registry@v2
         with:
