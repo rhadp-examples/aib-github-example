@@ -80,6 +80,7 @@ jobs:
           context: "containers/${{ matrix.name }}"
           tags: ${{ steps.set-tags.outputs.tags }}
           containerfiles: "containers/${{ matrix.name }}/Containerfile"
+          layers: true
           archs: arm64
 
       - name: Push To quay.io
