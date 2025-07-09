@@ -1,0 +1,26 @@
+name: AIB Test Workflow
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  test:
+    runs-on: [self-hosted, Linux, ARM64]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run tests
+        run: |
+          echo "Running tests on self-hosted runner..."
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit: ${{ github.sha }}"
+          
+      - name: Build
+        run: |
+          echo "Building application..."
+          # Add your build commands here
+
