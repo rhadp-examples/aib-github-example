@@ -1,4 +1,4 @@
-name: build container images
+name: build devcontainer image
 on:
   workflow_dispatch:
   pull_request:
@@ -86,7 +86,7 @@ jobs:
           file: "containers/${{ matrix.name }}/Containerfile"
           tags: ${{ steps.set-tags.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
