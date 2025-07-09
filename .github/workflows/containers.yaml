@@ -11,7 +11,10 @@ on:
 
 env:
   REGISTRY: quay.io
-  QUAY_ORG: quay.io/rhadp
+  REGISTRY_USER: ${{ secrets.QUAY_USERNAME }}
+  REGISTRY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+
+  REGISTRY_ORG: quay.io/rhadp
 
 jobs:
   build-image:
@@ -53,30 +56,31 @@ jobs:
       - name: set image tags
         id: set-tags
         run: |
-          TAGS="${{ env.QUAY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
+          TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="$TAGS,${{ env.QUAY_ORG }}/${{ matrix.name }}:latest"
+            TAGS="$TAGS,${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
           fi
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="$TAGS,${{ env.QUAY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
+            TAGS="$TAGS,${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
           fi
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      #- name: login to the registry
-      #  uses: redhat-actions/podman-login@v1
-      #  with:
-      #    registry: ${{ env.REGISTRY }}
-      #    username: ${{ secrets.QUAY_USERNAME }}
-      #    password: ${{ secrets.QUAY_TOKEN }}
+      - name: login to the registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_TOKEN }}
+          #auth_file_path: ${{ env.REGISTRY_AUTH_FILE }}
           
       - name: build the container
         uses: redhat-actions/buildah-build@v2
         with:
-          image: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+          image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
           context: "containers/${{ matrix.name }}"
           tags: ${{ steps.set-tags.outputs.tags }}
           containerfiles: "containers/${{ matrix.name }}/Containerfile"
@@ -87,24 +91,24 @@ jobs:
         id: push
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+          image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
           tags: ${{ steps.set-tags.outputs.tags }}
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_TOKEN }}
           
       - name: generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+          subject-name: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
       #  uses: docker/login-action@v3
       #  with:
       #  registry: quay.io
-      #  username: ${{ secrets.QUAY_USERNAME }}
-      #  password: ${{ secrets.QUAY_TOKEN }}
+      #  username: ${{ env.REGISTRY_USER }}
+      #  password: ${{ env.REGISTRY_TOKEN }}
 
       #- name: setup buildx
       #  uses: docker/setup-buildx-action@v3
@@ -112,7 +116,7 @@ jobs:
       #- id: metadata
       #  uses: docker/metadata-action@v5
       #  with:
-      #    images: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+      #    images: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
 
       #- name: build and push
       #  id: push
@@ -130,6 +134,6 @@ jobs:
       #- name: generate artifact attestation
       #  uses: actions/attest-build-provenance@v1
       #  with:
-      #    subject-name: ${{ env.QUAY_ORG }}/${{ matrix.name }}
+      #    subject-name: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
       #    subject-digest: ${{ steps.push.outputs.digest }}
       #    push-to-registry: true
