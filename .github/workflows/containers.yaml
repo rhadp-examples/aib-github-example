@@ -1,4 +1,4 @@
-name: build devcontainer image
+name: build container images
 on:
   workflow_dispatch:
   pull_request:
@@ -66,12 +66,12 @@ jobs:
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      - name: login to the registry
-        uses: redhat-actions/podman-login@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
+      #- name: login to the registry
+      #  uses: redhat-actions/podman-login@v1
+      #  with:
+      #    registry: ${{ env.REGISTRY }}
+      #    username: ${{ secrets.QUAY_USERNAME }}
+      #    password: ${{ secrets.QUAY_TOKEN }}
           
       - name: build the container
         uses: redhat-actions/buildah-build@v2
