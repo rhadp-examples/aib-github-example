@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - runs-on: [self-hosted, Linux, ARM64]
+          - runs-on: [self-hosted, Linux, ARM64, aib]
             name: builder
           #- runs-on: ubuntu-latest
           #  name: codespaces

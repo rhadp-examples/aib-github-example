@@ -1,0 +1,14 @@
+[Unit]
+Description=GitHub Actions Runner (rhadp-examples.aib-runner)
+After=network.target
+
+[Service]
+ExecStart=/mnt/data/github-runner/runsvc.sh
+User=ec2-user
+WorkingDirectory=/mnt/data/github-runner
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=5min
+
+[Install]
+WantedBy=multi-user.target

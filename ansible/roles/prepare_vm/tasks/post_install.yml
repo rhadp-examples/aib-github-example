@@ -1,0 +1,8 @@
+# Implement your post-install deployment tasks here
+# -------------------------------------------------
+
+- name: install additional python modules
+  become: true
+  shell: |
+    pip install boto3
+  delegate_to: "{{ instance_public_ip }}"

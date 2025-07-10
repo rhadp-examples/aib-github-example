@@ -1,0 +1,56 @@
+# Implement your pre-install deployment tasks here
+# -------------------------------------------------
+
+- name: update and upgrade all packages
+  become: true
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+  delegate_to: "{{ instance_public_ip }}"
+
+- name: install packages
+  become: true
+  dnf:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - "@virtualization-hypervisor"
+      - "@virtualization-client"
+      - "@virtualization-platform"
+      - "@virtualization-tools"
+      - qemu-kvm
+      - libvirt
+      - virt-install
+      - virt-viewer
+  delegate_to: "{{ instance_public_ip }}"
+
+- name: install builder packages
+  become: true
+  dnf:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - podman
+      - git
+      - python3.12
+      - python3-pip
+      - buildah
+      - dotnet-sdk-9.0
+      - make
+      - cmake
+      - gcc
+      - g++
+  delegate_to: "{{ instance_public_ip }}"
+
+- name: remove directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ work_dir }}/{{ item }}"
+    state: absent
+  with_items:
+    - "{{ aib_work_dir }}"
+    - "{{ github_runner_dir }}"
+  delegate_to: "{{ instance_public_ip }}"

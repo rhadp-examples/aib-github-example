@@ -1,0 +1,31 @@
+# Implement your install deployment tasks here
+# -------------------------------------------------
+
+- name: create directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ work_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+  with_items:
+    - "{{ aib_work_dir }}"
+    - "{{ aib_work_dir }}/builds"
+    - "{{ aib_work_dir }}/.mpp-cache"
+  delegate_to: "{{ instance_public_ip }}"
+
+- name: clone the automotive-image-builder repo
+  #become: true
+  git:
+    repo: "{{ aib_repo }}"
+    dest: "{{ work_dir }}/{{ aib_work_dir }}/{{ aib_dest }}"
+    version: "{{ aib_branch }}"
+    single_branch: true
+    force: true
+    depth: 1
+  delegate_to: "{{ instance_public_ip }}"
+
+# install the github runner
+- name: install github runner
+  import_tasks: install_github_runner.yml

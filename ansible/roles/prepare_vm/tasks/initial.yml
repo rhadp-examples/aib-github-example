@@ -1,0 +1,21 @@
+# Implement your initial tasks here
+# -------------------------------------------------
+
+- name: gather facts aws
+  when: cloud_provider == "aws"
+  block:
+    - name: get ec2 instance information
+      amazon.aws.ec2_instance_info:
+        filters:
+          "tag:Name": "{{ instance_name }}"
+          instance-state-name: ["running"]
+        aws_access_key: "{{ aws_access_key_id }}"
+        aws_secret_key: "{{ aws_secret_access_key }}"
+        region: "{{ aws_default_region }}"
+      register: ec2
+
+    - name: set public ip and public dns
+      set_fact:
+        instance_public_ip: "{{ ec2.instances[0].public_ip_address }}"
+        instance_public_dns: "{{ ec2.instances[0].public_dns_name }}"
+      when: ec2.instances | length > 0

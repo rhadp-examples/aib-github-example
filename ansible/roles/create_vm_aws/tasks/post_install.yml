@@ -2,8 +2,9 @@
 # -------------------------------------------------
 
 - name: list available block devices
-  command: lsblk
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: true
+  command: lsblk
   register: block_devices
 
 - name: show available block devices
@@ -11,12 +12,14 @@
     var: block_devices.stdout_lines
 
 - name: find the root device
-  shell: lsblk -rno NAME,MOUNTPOINT | grep '/$' | cut -d' ' -f1 | sed 's/[0-9]*$//'
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  register: root_device
   become: true
+  shell: lsblk -rno NAME,MOUNTPOINT | grep '/$' | cut -d' ' -f1 | sed 's/p\?[0-9]*$//'
+  register: root_device
 
 - name: find the additional storage device
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: true
   shell: |
     # Get all disk devices
     ALL_DISKS=$(lsblk -rno NAME,TYPE | grep disk | awk '{print $1}')
@@ -31,9 +34,7 @@
         break
       fi
     done
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
   register: additional_device_result
-  become: true
 
 - name: set additional device name
   set_fact:
@@ -45,41 +46,41 @@
     var: additional_device_name
 
 - name: create filesystem on additional storage device
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: true
   filesystem:
     fstype: ext4
     dev: "/dev/{{ additional_device_name }}"
     force: no
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: true
   when: additional_device_name is defined
 
 - name: create mount point directory
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: true
   file:
     path: "{{ volume_mount_point }}"
     state: directory
     mode: '0755'
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: true
 
 - name: mount additional storage device
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: true
   mount:
     path: "{{ volume_mount_point }}"
     src: "/dev/{{ additional_device_name }}"
     fstype: ext4
     state: mounted
     opts: defaults
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: true
   when: additional_device_name is defined
 
 - name: set proper ownership on mount point
+  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  become: true
   file:
     path: "{{ volume_mount_point }}"
     owner: root
     group: root
     mode: '0755'
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: true
 
 - name: show login command
   debug:

@@ -11,3 +11,7 @@
       include_role:
         name: roles/create_vm_aws
       when: cloud_provider == "aws"
+
+    - name: remove the github runner
+      include_role:
+        name: roles/prepare_vm

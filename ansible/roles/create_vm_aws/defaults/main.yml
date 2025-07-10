@@ -16,5 +16,4 @@ subnet_cidr: "10.0.1.0/24"
 # names for the resources
 security_group_name: "rhel-arm-sg"
 security_group_description: "Security group for RHEL ARM instance"
-instance_name: "rhel-arm-instance"
 keypair_name: "rhel-arm-keypair"
