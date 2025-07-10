@@ -21,10 +21,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - runs-on:
+          - name: builder
+            runs-on:
               group: default
               labels: [self-hosted, Linux, ARM64, aib]
-              name: builder
           #- runs-on: ubuntu-latest
           #  name: codespaces
 
