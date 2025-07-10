@@ -1,12 +1,6 @@
-FROM --platform=linux/arm64 quay.io/centos/centos:stream9
+FROM --platform=linux/arm64 quay.io/rhadp/builder:latest
 
-RUN dnf update -y && dnf clean all
-
-RUN dnf install -y epel-release && dnf clean all
-
-RUN dnf groupinstall -y "Development Tools" && \
-    dnf install -y \
-    cmake make gcc gcc-c++ git clang-tools-extra \
-    python3.12 python3-pip \
-    && dnf clean all \
-    && rm -rf /var/cache/dnf
+RUN dnf install -y socat vsomeip3 vsomeip3-devel vsomeip3-routingmanager dlt-daemon dlt-tools dlt-libs dlt-libs-devel && \
+    dnf install -y boost-devel boost-system boost-thread boost-log boost-chrono boost-date-time boost-atomic boost-filesystem boost-regex && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf

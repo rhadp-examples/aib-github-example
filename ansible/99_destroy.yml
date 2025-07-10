@@ -4,11 +4,10 @@
     # set the following to control the install/uninstall process
     silent: false
     become_override: false
-    ACTION: "INSTALL" # INSTALL, UNINSTALL, UPDATE
+    ACTION: "UNINSTALL" # INSTALL, UNINSTALL, UPDATE
 
   tasks:
-    - name: create the vm
+    - name: delete the vm
       include_role:
         name: roles/create_vm_aws
       when: cloud_provider == "aws"
-        

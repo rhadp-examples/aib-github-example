@@ -14,19 +14,26 @@
   shell: lsblk -rno NAME,MOUNTPOINT | grep '/$' | cut -d' ' -f1 | sed 's/[0-9]*$//'
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
   register: root_device
-  become: yes
-
-- name: find all disk devices
-  shell: lsblk -rno NAME,SIZE,TYPE | grep disk | awk '{print $1}'
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  register: all_devices
-  become: yes
+  become: true
 
 - name: find the additional storage device
-  shell: lsblk -rno NAME,SIZE,TYPE | grep disk | grep -v "{{ root_device.stdout }}" | head -1 | awk '{print $1}'
+  shell: |
+    # Get all disk devices
+    ALL_DISKS=$(lsblk -rno NAME,TYPE | grep disk | awk '{print $1}')
+    # Get the root device (trimmed of whitespace)
+    ROOT_DEVICE=$(echo "{{ root_device.stdout }}" | tr -d '[:space:]')
+    # Filter out the root device
+    for disk in $ALL_DISKS; do
+      # Trim whitespace from disk name
+      disk_trimmed=$(echo "$disk" | tr -d '[:space:]')
+      if [ "$disk_trimmed" != "$ROOT_DEVICE" ]; then
+        echo "$disk_trimmed"
+        break
+      fi
+    done
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
   register: additional_device_result
-  become: yes
+  become: true
 
 - name: set additional device name
   set_fact:
@@ -43,36 +50,36 @@
     dev: "/dev/{{ additional_device_name }}"
     force: no
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: yes
+  become: true
   when: additional_device_name is defined
 
 - name: create mount point directory
   file:
-    path: /mnt/data
+    path: "{{ volume_mount_point }}"
     state: directory
     mode: '0755'
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: yes
+  become: true
 
 - name: mount additional storage device
   mount:
-    path: /mnt/data
+    path: "{{ volume_mount_point }}"
     src: "/dev/{{ additional_device_name }}"
     fstype: ext4
     state: mounted
     opts: defaults
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: yes
+  become: true
   when: additional_device_name is defined
 
 - name: set proper ownership on mount point
   file:
-    path: /mnt/data
+    path: "{{ volume_mount_point }}"
     owner: root
     group: root
     mode: '0755'
   delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-  become: yes
+  become: true
 
 - name: show login command
   debug:
