@@ -69,15 +69,6 @@ jobs:
         run: |
           TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
 
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="$TAGS ${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
-          fi
-
-          if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
-            RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="$TAGS ${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
-          fi
-
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       #- name: login to the registry
@@ -111,16 +102,42 @@ jobs:
             --arch arm64 --layers \
             "containers/${{ matrix.name }}"
 
+      #- name: push to registry
+      #  id: push
+      #  uses: redhat-actions/push-to-registry@v2.8
+      #  with:
+      #    image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
+      #    tags: ${{ steps.set-tags.outputs.tags }}
+      #    #registry: ${{ env.REGISTRY }}
+      #    username: ${{ env.REGISTRY_USER }}
+      #    password: ${{ env.REGISTRY_TOKEN }}
+
       - name: push to registry
-        id: push
-        uses: redhat-actions/push-to-registry@v2.8
-        with:
-          image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
-          tags: ${{ steps.set-tags.outputs.tags }}
-          #registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_TOKEN }}
-          
+        run: |
+          podman push ${{ steps.set-tags.outputs.tags }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+          if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
+            RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
+            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+      # OLD STUFF
+
       #- name: generate artifact attestation
       #  uses: actions/attest-build-provenance@v1
       #  with:
