@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: builder
+          - name: radio-app
             runs-on:
               group: aib-runners
               labels: [self-hosted, Linux, ARM64, aib]
