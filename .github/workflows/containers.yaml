@@ -14,7 +14,7 @@ env:
   REGISTRY_USER: ${{ secrets.QUAY_USERNAME }}
   REGISTRY_TOKEN: ${{ secrets.QUAY_TOKEN }}
 
-  REGISTRY_ORG: quay.io/rhadp
+  REGISTRY_ORG: quay.io/rhadp/aib-github-example
 
   WORK_DIR: "/mnt/data/builds"
 
