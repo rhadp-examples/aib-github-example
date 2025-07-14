@@ -63,9 +63,6 @@ jobs:
           mkdir -p $BUILD_DIR
           echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
           echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
-          pwd
-          echo `pwd`
-          echo `ls -la`
 
       - name: set image tags
         id: set-tags
@@ -97,15 +94,22 @@ jobs:
             --username ${{ env.REGISTRY_USER }} \
             --password ${{ env.REGISTRY_TOKEN }}
 
+      #- name: build the container
+      #  uses: redhat-actions/buildah-build@v2
+      #  with:
+      #    image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
+      #    context: "containers/${{ matrix.name }}"
+      #    tags: ${{ steps.set-tags.outputs.tags }}
+      #    containerfiles: "containers/${{ matrix.name }}/Containerfile"
+      #    layers: true
+      #    archs: arm64
+
       - name: build the container
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
-          context: "containers/${{ matrix.name }}"
-          tags: ${{ steps.set-tags.outputs.tags }}
-          containerfiles: "containers/${{ matrix.name }}/Containerfile"
-          layers: true
-          archs: arm64
+        run: |
+          buildah bud -f "containers/${{ matrix.name }}/Containerfile" \
+            --tag ${{ steps.set-tags.outputs.tags }} \
+            --arch arm64 --layers \
+            "containers/${{ matrix.name }}"
 
       - name: push to registry
         id: push
