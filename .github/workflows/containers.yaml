@@ -23,7 +23,7 @@ jobs:
         include:
           - name: builder
             runs-on:
-              group: default
+              group: aib-runners
               labels: [self-hosted, Linux, ARM64, aib]
           #- runs-on: ubuntu-latest
           #  name: codespaces
