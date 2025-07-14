@@ -1,8 +1,21 @@
 # Implement your post-install deployment tasks here
 # -------------------------------------------------
 
+- name: create other directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+  with_items:
+    - ".docker"
+  delegate_to: "{{ instance_public_ip }}"
+
 - name: install additional python modules
   become: true
   shell: |
     pip install boto3
   delegate_to: "{{ instance_public_ip }}"
+

@@ -1,7 +1,7 @@
 # Implement your install deployment tasks here
 # -------------------------------------------------
 
-- name: create directories
+- name: create directories for the aib runner
   become: true
   ansible.builtin.file:
     path: "{{ work_dir }}/{{ item }}"
