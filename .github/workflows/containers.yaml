@@ -71,12 +71,12 @@ jobs:
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      - name: login to the registry
-        uses: redhat-actions/podman-login@v1.7
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_TOKEN }}
+      #- name: login to the registry
+      #  uses: redhat-actions/podman-login@v1.7
+      #  with:
+      #    registry: ${{ env.REGISTRY }}
+      #    username: ${{ env.REGISTRY_USER }}
+      #    password: ${{ env.REGISTRY_TOKEN }}
           
       - name: build the container
         uses: redhat-actions/buildah-build@v2
@@ -95,8 +95,8 @@ jobs:
           image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
           tags: ${{ steps.set-tags.outputs.tags }}
           #registry: ${{ env.REGISTRY }}
-          #username: ${{ env.REGISTRY_USER }}
-          #password: ${{ env.REGISTRY_TOKEN }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_TOKEN }}
           
       #- name: generate artifact attestation
       #  uses: actions/attest-build-provenance@v1
