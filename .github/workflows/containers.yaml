@@ -111,4 +111,7 @@ jobs:
 
       - name: cleanup
         run: |
+          podman logout ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
           rm -rf ${{ env.BUILD_DIR }}
