@@ -13,6 +13,8 @@
     - "{{ aib_work_dir }}"
     - "{{ aib_work_dir }}/builds"
     - "{{ aib_work_dir }}/.mpp-cache"
+    - "{{ builds_temp_dir }}"
+    - "{{ images_dir }}"
   delegate_to: "{{ instance_public_ip }}"
 
 - name: clone the automotive-image-builder repo

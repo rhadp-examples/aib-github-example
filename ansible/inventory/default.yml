@@ -2,12 +2,15 @@ all:
   vars:
     instance_name: "rhel-arm-instance"
     
+    # shared directories
     work_dir: "/mnt/data" # SHOULD match the additional storage device mount point
+    builds_temp_dir: "builds"
+    images_dir: "images"
     
+    # application specific directories
     github_runner_dir: "github-runner"
-    
     aib_work_dir: "aib"
-
+    
     # automotive-image-builder repo
     aib_repo: "https://gitlab.com/CentOS/automotive/src/automotive-image-builder"
     aib_branch: "main"

@@ -53,4 +53,5 @@
   with_items:
     - "{{ aib_work_dir }}"
     - "{{ github_runner_dir }}"
+    - "{{ builds_temp_dir }}"
   delegate_to: "{{ instance_public_ip }}"
