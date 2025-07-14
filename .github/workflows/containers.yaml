@@ -95,8 +95,8 @@ jobs:
           image: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
           tags: ${{ steps.set-tags.outputs.tags }}
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_TOKEN }}
+          #username: ${{ env.REGISTRY_USER }}
+          #password: ${{ env.REGISTRY_TOKEN }}
           
       - name: generate artifact attestation
         uses: actions/attest-build-provenance@v1
