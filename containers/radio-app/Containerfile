@@ -1,6 +1,0 @@
-FROM --platform=linux/arm64 quay.io/rhadp/builder:latest
-
-RUN dnf install -y socat vsomeip3 vsomeip3-devel vsomeip3-routingmanager dlt-daemon dlt-tools dlt-libs dlt-libs-devel && \
-    dnf install -y boost-devel boost-system boost-thread boost-log boost-chrono boost-date-time boost-atomic boost-filesystem boost-regex && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf

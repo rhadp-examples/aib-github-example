@@ -1,4 +1,4 @@
-FROM quay.io/rhadp/builder:latest
+FROM --platform=linux/arm64 quay.io/rhadp-examples/application:latest
 
 COPY . /opt/src
 

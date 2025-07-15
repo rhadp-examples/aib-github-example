@@ -1,32 +1,37 @@
-name: build application container images
+name: build application container image
 on:
   workflow_dispatch:
   pull_request:
     branches:
       - develop
-      - main
+
   push:
     branches:
       - develop
-      - main
+
 
 env:
   REGISTRY: quay.io
   REGISTRY_ORG: quay.io/rhadp-examples
   
   WORK_DIR: "/mnt/data/builds"
+  RUNNER_GROUP: "aib-runners"
 
 jobs:
-  build-application-containers:
-    strategy:
-      matrix:
-        include:
-          - name: application
-            runs-on:
-              group: aib-runners
-              labels: [self-hosted, Linux, ARM64, aib]
+  build-radio-application-container:
+    #strategy:
+    #  matrix:
+    #    include:
+    #      - name: radio-app
+    #      runs-on:
+    #        group: ${{ env.RUNNER_GROUP }}
+    #        labels: [self-hosted, Linux, ARM64, aib]
 
-    runs-on: ${{ matrix.runs-on }}
+    #runs-on: ${{ matrix.runs-on }}
+    runs-on:
+      group: ${{ env.RUNNER_GROUP }}
+      labels: [self-hosted, Linux, ARM64, aib]
+
     permissions:
       packages: write
       contents: read
@@ -69,10 +74,10 @@ jobs:
 
       - name: build the container
         run: |
-          buildah bud -f "containers/${{ matrix.name }}/Containerfile" \
+          buildah bud -f "src/Containerfile" \
             --tag ${{ steps.set-tags.outputs.tags }} \
             --arch arm64 --layers \
-            "containers/${{ matrix.name }}"
+            "src"
 
       - name: push to registry
         run: |
