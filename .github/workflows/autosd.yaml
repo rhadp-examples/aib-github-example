@@ -82,7 +82,7 @@ jobs:
             --build-dir="${{ env.BUILD_DIR }}" \
             --cache-max-size="${{ env.CACHESIZE }}" \
             --osbuild-manifest="${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.json" \
-            "${{ env.MANIFEST }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}"
+            "${{ env.MANIFEST }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}""
 
           podman run --rm --privileged --pull=newer --security-opt label=type:unconfined_t \
             -v /dev:/dev -v "$PWD":"$PWD" \
