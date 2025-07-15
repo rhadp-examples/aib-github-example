@@ -15,7 +15,6 @@ env:
   REGISTRY_ORG: quay.io/rhadp-examples
   
   WORK_DIR: "/mnt/data/builds"
-  RUNNER_GROUP: "aib-runners"
 
 jobs:
   build-radio-application-container:
@@ -29,7 +28,7 @@ jobs:
 
     #runs-on: ${{ matrix.runs-on }}
     runs-on:
-      group: ${{ env.RUNNER_GROUP }}
+      group: aib-runners
       labels: [self-hosted, Linux, ARM64, aib]
 
     permissions:

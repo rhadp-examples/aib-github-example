@@ -13,7 +13,6 @@ env:
   REGISTRY_ORG: quay.io/rhadp-examples
 
   WORK_DIR: "/mnt/data/builds"
-  RUNNER_GROUP: "aib-runners"
 
 jobs:
   # build base container images on hosted runners, i.e. on GitHub infrastructure
