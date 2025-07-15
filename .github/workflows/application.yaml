@@ -18,15 +18,6 @@ env:
 
 jobs:
   build-radio-application-container:
-    #strategy:
-    #  matrix:
-    #    include:
-    #      - name: radio-app
-    #      runs-on:
-    #        group: ${{ env.RUNNER_GROUP }}
-    #        labels: [self-hosted, Linux, ARM64, aib]
-
-    #runs-on: ${{ matrix.runs-on }}
     runs-on:
       group: aib-runners
       labels: [self-hosted, Linux, ARM64, aib]
@@ -60,7 +51,7 @@ jobs:
       - name: set image tags
         id: set-tags
         run: |
-          TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
+          TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
@@ -84,7 +75,7 @@ jobs:
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
+            TAGS="${{ env.REGISTRY_ORG }}/radio-app:latest"
             
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
@@ -94,7 +85,7 @@ jobs:
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
+            TAGS="${{ env.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
             
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
