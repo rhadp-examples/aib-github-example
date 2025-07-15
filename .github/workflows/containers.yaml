@@ -125,7 +125,7 @@ jobs:
         include:
           - name: application
             runs-on:
-              group: ${{ env.RUNNER_GROUP }}
+              group: "${{ env.RUNNER_GROUP }}"
               labels: [self-hosted, Linux, ARM64, aib]
 
     runs-on: ${{ matrix.runs-on }}
