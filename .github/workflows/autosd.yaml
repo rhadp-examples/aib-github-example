@@ -18,7 +18,7 @@ env:
   AIB_DIR: "/mnt/data/aib"
 
   # AIB parameters
-  MANIFEST: manifests/radioapp.aib.yml
+  MANIFEST: radioapp.aib.yml
 
   AIB_DISTRO: autosd9  # autosd cs9
   AIB_ARCH: aarch64 # aarch64 x86_64
@@ -29,6 +29,9 @@ env:
   CACHESIZE: "1GB"
   BUILD_NAME: "output"
   BUILDER_IMAGE: quay.io/centos-sig-automotive/automotive-osbuild:latest
+
+  # import secrets
+  ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
 
 jobs:
   build-autosd-image:
@@ -69,6 +72,14 @@ jobs:
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
+      - name: write the manifest
+        uses: cuchi/jinja2-action@v1.3.0
+        with:
+          template: manifests${{ env.MANIFEST }}
+          output_file: ${{ env.BUILD_DIR }}/${{ env.MANIFEST }}
+        env:
+          ROOT_PASSWORD: ${{ env.ROOT_PASSWORD }}
+
       - name: build the autosd image
         run: |
           CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
@@ -83,7 +94,7 @@ jobs:
             --build-dir="${{ env.BUILD_DIR }}" \
             --cache-max-size="${{ env.CACHESIZE }}" \
             --osbuild-manifest="${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.json" \
-            "$PWD/${{ env.MANIFEST }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}""
+            "${{ env.BUILD_DIR }}/${{ env.MANIFEST }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}""
 
           sudo podman run --rm --privileged --pull=newer --security-opt label=type:unconfined_t \
             -v /dev:/dev \

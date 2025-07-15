@@ -22,10 +22,10 @@ content:
     - openssh-clients
     - vim
 
-  #container_images:
-  #  - source: ${{values.registry_host}}/${{values.registry_destination}} # templated in backstage
-  #    tag: latest
-  #    name: localhost/app
+  container_images:
+    - source: quay.io/rhadp-examples/radio-app
+      tag: "{{ env['VERSION'] }}"
+      name: localhost/app
 
   add_files:
     - path: /etc/containers/systemd/radio.container
@@ -46,4 +46,4 @@ content:
 
 auth:
   # "password"
-  root_password: $6$xoLqEUz0cGGJRx01$H3H/bFm0myJPULNMtbSsOFd/2BnHqHkMD92Sfxd.EKM9hXTWSmELG8cf205l6dktomuTcgKGGtGDgtvHVXSWU.
+  root_password: "{{ env['ROOT_PASSWORD'] }}"
