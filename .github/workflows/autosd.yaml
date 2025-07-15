@@ -92,7 +92,7 @@ jobs:
             -v "${{ env.AIB_DIR }}":"${{ env.AIB_DIR }}" \
             ${{ env.BUILDER_IMAGE }} \
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
-            && mv "${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+            && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
 
       - name: cleanup
         run: |
