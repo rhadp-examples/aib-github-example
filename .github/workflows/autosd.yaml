@@ -96,4 +96,4 @@ jobs:
 
       - name: cleanup
         run: |
-          rm -rf ${{ env.BUILD_DIR }}
+          sudo rm -rf ${{ env.BUILD_DIR }}
