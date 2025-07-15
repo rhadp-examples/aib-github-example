@@ -1,46 +1,39 @@
-name: build container images
+name: build base container images
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - "main"
+      - main
   push:
     branches:
       - main
-      - develop
 
 env:
   REGISTRY: quay.io
-  REGISTRY_USER: ${{ secrets.QUAY_USERNAME }}
-  REGISTRY_TOKEN: ${{ secrets.QUAY_TOKEN }}
-
-  REGISTRY_ORG: quay.io/rhadp
-
-  WORK_DIR: "/mnt/data/builds"
+  REGISTRY_ORG: quay.io/rhadp-examples
 
 jobs:
-  build-image:
+  build-base-containers:
     strategy:
       matrix:
         include:
-          - name: radio-app
-            runs-on:
-              group: aib-runners
-              labels: [self-hosted, Linux, ARM64, aib]
+          - runs-on: ubuntu-latest
+            name: codespaces
 
     runs-on: ${{ matrix.runs-on }}
+    
     permissions:
       packages: write
       contents: read
       id-token: write
       attestations: write
-
+      
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+      
       - name: get version
         run: |
           # check if there are any tags, if not use a default version
@@ -55,61 +48,67 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}"
 
-      - name: create temp build directory
-        run: |
-          BUILD_DIR="${{ env.WORK_DIR }}/${{ env.VERSION }}"
-          mkdir -p $BUILD_DIR
-          echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
-          echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
-
       - name: set image tags
         id: set-tags
         run: |
           TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
 
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
-
-      - name: login to the registry
-        run: |
-          podman login ${{ env.REGISTRY }} \
-            --authfile ${{ env.PODMAN_AUTH_FILE }} \
-            --username ${{ env.REGISTRY_USER }} \
-            --password ${{ env.REGISTRY_TOKEN }}
-
-      - name: build the container
-        run: |
-          buildah bud -f "containers/${{ matrix.name }}/Containerfile" \
-            --tag ${{ steps.set-tags.outputs.tags }} \
-            --arch arm64 --layers \
-            "containers/${{ matrix.name }}"
-
-      - name: push to registry
-        run: |
-          podman push ${{ steps.set-tags.outputs.tags }} \
-            --authfile ${{ env.PODMAN_AUTH_FILE }}
-
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
-            
-            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
-            
-            podman push $TAGS \
-              --authfile ${{ env.PODMAN_AUTH_FILE }}
+            TAGS="$TAGS,${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
           fi
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
-            
-            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
-            
-            podman push $TAGS \
-              --authfile ${{ env.PODMAN_AUTH_FILE }}
+            TAGS="$TAGS,${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
           fi
 
-      - name: cleanup
-        run: |
-          podman logout ${{ env.REGISTRY }} \
-            --authfile ${{ env.PODMAN_AUTH_FILE }}
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-          rm -rf ${{ env.BUILD_DIR }}
+      - name: enable docker multi-arch support
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: login to quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+      
+      - name: setup qemu
+        uses: docker/setup-qemu-action@v3
+
+      - name: setup buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
+      
+      - name: build and push
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: "containers/${{ matrix.name }}"
+          file: "containers/${{ matrix.name }}/Containerfile"
+          tags: ${{ steps.set-tags.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+
+      - name: generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY_ORG }}/${{ matrix.name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

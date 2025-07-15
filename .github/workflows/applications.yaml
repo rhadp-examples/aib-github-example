@@ -1,0 +1,113 @@
+name: build application container images
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - develop
+      - main
+  push:
+    branches:
+      - develop
+      - main
+
+env:
+  REGISTRY: quay.io
+  REGISTRY_ORG: quay.io/rhadp-examples
+  
+  WORK_DIR: "/mnt/data/builds"
+
+jobs:
+  build-application-containers:
+    strategy:
+      matrix:
+        include:
+          - name: application
+            runs-on:
+              group: aib-runners
+              labels: [self-hosted, Linux, ARM64, aib]
+
+    runs-on: ${{ matrix.runs-on }}
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: get version
+        run: |
+          # check if there are any tags, if not use a default version
+          if git describe --tags --exact-match HEAD 2>/dev/null; then
+            VERSION=$(git describe --tags --exact-match HEAD)
+          elif git describe --tags 2>/dev/null; then
+            VERSION=$(git describe --tags)
+          else
+            VERSION="$(git rev-parse --short HEAD)"
+          fi
+          VERSION=${VERSION#v} # remove the leading v prefix for version
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}"
+
+      - name: create temp build directory
+        run: |
+          BUILD_DIR="${{ env.WORK_DIR }}/${{ env.VERSION }}"
+          mkdir -p $BUILD_DIR
+          echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
+          echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
+
+      - name: set image tags
+        id: set-tags
+        run: |
+          TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: login to the registry
+        run: |
+          podman login ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }} \
+            --username ${{ secrets.REGISTRY_USERNAME }} \
+            --password ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: build the container
+        run: |
+          buildah bud -f "containers/${{ matrix.name }}/Containerfile" \
+            --tag ${{ steps.set-tags.outputs.tags }} \
+            --arch arm64 --layers \
+            "containers/${{ matrix.name }}"
+
+      - name: push to registry
+        run: |
+          podman push ${{ steps.set-tags.outputs.tags }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:latest"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+          if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
+            RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
+            TAGS="${{ env.REGISTRY_ORG }}/${{ matrix.name }}:${RELEASE_BRANCH_NAME}"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+      - name: cleanup
+        run: |
+          podman logout ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          rm -rf ${{ env.BUILD_DIR }}
