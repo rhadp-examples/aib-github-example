@@ -35,6 +35,7 @@
   vars:
     packages:
       - podman
+      - podman-docker
       - git
       - python3.12
       - python3-pip
