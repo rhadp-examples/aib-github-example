@@ -2,6 +2,7 @@
 # -------------------------------------------------
 
 - name: create other directories
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   ansible.builtin.file:
     path: "{{ item }}"
@@ -11,11 +12,10 @@
     mode: "0755"
   with_items:
     - ".docker"
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: install additional python modules
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: |
     pip install boto3
-  delegate_to: "{{ instance_public_ip }}"
 

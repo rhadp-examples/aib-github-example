@@ -2,7 +2,7 @@
 # -------------------------------------------------
 
 - name: list available block devices
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   command: lsblk
   register: block_devices
@@ -12,13 +12,13 @@
     var: block_devices.stdout_lines
 
 - name: find the root device
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: lsblk -rno NAME,MOUNTPOINT | grep '/$' | cut -d' ' -f1 | sed 's/p\?[0-9]*$//'
   register: root_device
 
 - name: find the additional storage device
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: |
     # Get all disk devices
@@ -46,7 +46,7 @@
     var: additional_device_name
 
 - name: create filesystem on additional storage device
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   filesystem:
     fstype: ext4
@@ -55,7 +55,7 @@
   when: additional_device_name is defined
 
 - name: create mount point directory
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   file:
     path: "{{ volume_mount_point }}"
@@ -63,7 +63,7 @@
     mode: '0755'
 
 - name: mount additional storage device
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   mount:
     path: "{{ volume_mount_point }}"
@@ -74,7 +74,7 @@
   when: additional_device_name is defined
 
 - name: set proper ownership on mount point
-  delegate_to: "{{ ec2.instances[0].public_ip_address }}"
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   file:
     path: "{{ volume_mount_point }}"
@@ -82,6 +82,3 @@
     group: root
     mode: '0755'
 
-- name: show login command
-  debug:
-    msg: "ssh -i {{ ansible_ssh_private_key_file }} {{ ansible_user }}@{{ ec2.instances[0].public_dns_name }}"

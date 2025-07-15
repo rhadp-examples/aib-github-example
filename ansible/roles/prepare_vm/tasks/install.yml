@@ -2,6 +2,7 @@
 # -------------------------------------------------
 
 - name: create directories for the aib runner
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   ansible.builtin.file:
     path: "{{ work_dir }}/{{ item }}"
@@ -15,10 +16,10 @@
     - "{{ aib_work_dir }}/.mpp-cache"
     - "{{ builds_temp_dir }}"
     - "{{ images_dir }}"
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: clone the automotive-image-builder repo
-  #become: true
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
   git:
     repo: "{{ aib_repo }}"
     dest: "{{ work_dir }}/{{ aib_work_dir }}/{{ aib_dest }}"
@@ -26,7 +27,6 @@
     single_branch: true
     force: true
     depth: 1
-  delegate_to: "{{ instance_public_ip }}"
 
 # install the github runner
 - name: install github runner

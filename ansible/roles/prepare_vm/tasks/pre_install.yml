@@ -2,14 +2,15 @@
 # -------------------------------------------------
 
 - name: update and upgrade all packages
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   dnf:
     name: "*"
     state: latest
     update_cache: yes
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: install packages
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   dnf:
     name: "{{ packages }}"
@@ -24,9 +25,9 @@
       - libvirt
       - virt-install
       - virt-viewer
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: install builder packages
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   dnf:
     name: "{{ packages }}"
@@ -43,9 +44,9 @@
       - cmake
       - gcc
       - g++
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: remove directories
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   ansible.builtin.file:
     path: "{{ work_dir }}/{{ item }}"
@@ -54,4 +55,4 @@
     - "{{ aib_work_dir }}"
     - "{{ github_runner_dir }}"
     - "{{ builds_temp_dir }}"
-  delegate_to: "{{ instance_public_ip }}"
+  

@@ -1,5 +1,6 @@
 ---
 - name: create directories
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   ansible.builtin.file:
     path: "{{ work_dir }}/{{ github_runner_dir }}"
@@ -7,9 +8,9 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0755"
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: download the github runner
+  delegate_to: "{{ instance_public_ip }}"
   shell: |
     cd {{ work_dir }}/{{ github_runner_dir }}
 
@@ -17,17 +18,17 @@
       -L https://github.com/actions/runner/releases/download/v{{ github_runner_version }}/actions-runner-linux-arm64-{{ github_runner_version }}.tar.gz
 
     tar xzf ./actions-runner-linux-arm64-{{ github_runner_version }}.tar.gz
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: change file permissions
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: |
     cd {{ work_dir }}/{{ github_runner_dir }}
 
     chmod -R "0755" *
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: configure the github runner
+  delegate_to: "{{ instance_public_ip }}"
   shell: |
     cd {{ work_dir }}/{{ github_runner_dir }}
 
@@ -47,9 +48,9 @@
       --runnergroup "{{ github_runner_group }}" \
       --labels "{{ github_runner_labels }}" \
       --replace
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: register the github runner as a service
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: |
     cd {{ work_dir }}/{{ github_runner_dir }}
@@ -59,9 +60,9 @@
     chcon system_u:object_r:usr_t:s0 ./svc.sh
 
     ./svc.sh install
-  delegate_to: "{{ instance_public_ip }}"
 
 - name: start the github runner
+  delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: |
     cd {{ work_dir }}/{{ github_runner_dir }}
@@ -71,4 +72,3 @@
     chcon system_u:object_r:usr_t:s0 ./runsvc.sh
 
     ./svc.sh start
-  delegate_to: "{{ instance_public_ip }}"
