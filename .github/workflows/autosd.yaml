@@ -1,0 +1,95 @@
+name: build the autosd image
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+
+env:
+  REGISTRY: quay.io
+  REGISTRY_ORG: quay.io/rhadp-examples
+  
+  WORK_DIR: "/mnt/data/builds"
+  IMAGE_DIR: "/mnt/data/images"
+
+  # AIB parameters
+  MANIFEST: manifests/radioapp.aib.yml
+
+  AIB_DISTRO: autosd9  # autosd cs9
+  AIB_ARCH: aarch64 # aarch64 x86_64
+  AIB_TARGET: qemu # rpi4 qemu
+  AIB_MODE: package # package image
+  AIB_EXPORT_FORMAT: qcow2 # image qcow2 container
+
+  CACHESIZE: "1GB"
+  BUILD_NAME: "output"
+  BUILDER_IMAGE: quay.io/centos-sig-automotive/automotive-osbuild:latest
+
+jobs:
+  build-autosd-image:
+    runs-on:
+      group: aib-runners
+      labels: [self-hosted, Linux, ARM64, aib]
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: get version
+        run: |
+          VERSION="$(git rev-parse --short HEAD)"
+          VERSION=${VERSION#v} # remove the leading v prefix for version
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}"
+
+      - name: create temp build directory
+        run: |
+          BUILD_DIR="${{ env.WORK_DIR }}/${{ env.VERSION }}"
+          mkdir -p $BUILD_DIR
+          echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
+          #echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
+
+      - name: set image tags
+        id: set-tags
+        run: |
+          TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: build the autosd image
+        run: |
+          CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
+
+          OSBUILD_CMD="automotive-image-builder/automotive-image-builder \
+            --verbose build \
+            --distro "${{ env.AIB_DISTRO }}" \
+            --arch "${{ env.AIB_ARCH }}" \
+            --target "${{ env.AIB_TARGET }}" \
+            --mode "${{ env.AIB_MODE }}" \
+            --export "${{ env.AIB_EXPORT_FORMAT }}" \
+            --build-dir="${{ env.BUILD_DIR }}" \
+            --cache-max-size="${{ env.CACHESIZE }}" \
+            --osbuild-manifest="${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.json" \
+            "${{ env.MANIFEST }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}"
+
+          podman run --rm --privileged --pull=newer --security-opt label=type:unconfined_t \
+            -v /dev:/dev -v "$PWD":"$PWD" \
+            ${{ env.BUILDER_IMAGE }} \
+            /bin/bash -c "cd $PWD/; $OSBUILD_CMD" \
+            && mv "${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+
+      - name: cleanup
+        run: |
+          rm -rf ${{ env.BUILD_DIR }}

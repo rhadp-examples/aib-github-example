@@ -1,14 +1,13 @@
 name: build application container image
 on:
   workflow_dispatch:
+
   pull_request:
     branches:
-      - develop
-
+      - develop2
   push:
     branches:
-      - develop
-
+      - develop2
 
 env:
   REGISTRY: quay.io

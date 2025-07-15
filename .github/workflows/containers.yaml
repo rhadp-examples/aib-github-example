@@ -1,6 +1,7 @@
 name: build base container images
 on:
   workflow_dispatch:
+  
   pull_request:
     branches:
       - main
