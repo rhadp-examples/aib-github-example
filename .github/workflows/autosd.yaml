@@ -60,10 +60,13 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}"
 
-      - name: create temp build directory
+      - name: create temp build directories
         run: |
           BUILD_DIR="${{ env.WORK_DIR }}/${{ env.VERSION }}"
           mkdir -p $BUILD_DIR
+
+          mkdir -p ${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY
+
           echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
           echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
 
@@ -146,7 +149,7 @@ jobs:
             -v "${{ env.AIB_DIR }}":"${{ env.AIB_DIR }}" \
             ${{ env.BUILDER_IMAGE }} \
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
-            && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+            && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
 
       # cleanup
 
