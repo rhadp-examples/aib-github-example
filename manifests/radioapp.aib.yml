@@ -29,9 +29,9 @@ content:
 
   add_files:
     - path: /etc/containers/systemd/radio.container
-      source_path: ../src/radio.container
+      source_path: "{{WORKSPACE}}/src/radio.container"
     - path: /usr/local/bin/radio-client
-      source_path: ../src/radio-client-wrapper
+      source_path: "{{WORKSPACE}}/src/radio-client-wrapper"
 
   chmod_files:
     - path: /usr/local/bin/radio-client

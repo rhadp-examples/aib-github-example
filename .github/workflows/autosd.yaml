@@ -77,13 +77,10 @@ jobs:
         with:
           template: manifests/${{ env.MANIFEST_FILE }}
           file: ${{ env.BUILD_DIR }}/${{ env.MANIFEST_FILE }}
-          variables: "ROOT_PASSWORD=${{ env.ROOT_PASSWORD }} VERSION=${{ env.VERSION }}"
+          variables: "WORKSPACE=$GITHUB_WORKSPACE VERSION=${{ env.VERSION }} ROOT_PASSWORD=${{ env.ROOT_PASSWORD }}"
 
       - name: build the autosd image
         run: |
-          echo $PWD
-          echo $GITHUB_WORKSPACE
-          
           CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
 
           OSBUILD_CMD="automotive-image-builder/automotive-image-builder \
