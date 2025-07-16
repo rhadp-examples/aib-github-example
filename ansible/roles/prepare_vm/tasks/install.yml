@@ -23,8 +23,6 @@
     mode: "0755"
   with_items:
     - "{{ aib_work_dir }}"
-    - "{{ aib_work_dir }}/builds" # FIXME: remove this directory
-    - "{{ aib_work_dir }}/.mpp-cache" # FIXME: remove this directory
     - "{{ workspace_dir }}"
     - "{{ images_dir }}"
 
