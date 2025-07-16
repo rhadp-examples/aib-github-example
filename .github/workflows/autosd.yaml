@@ -4,10 +4,10 @@ on:
 
   pull_request:
     branches:
-      - develop
+      - main
   push:
     branches:
-      - develop
+      - main
 
 env:
   REGISTRY: quay.io
@@ -51,6 +51,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      # prepare the environment
+      
       - name: get version
         run: |
           VERSION="$(git rev-parse --short HEAD)"
@@ -63,7 +65,7 @@ jobs:
           BUILD_DIR="${{ env.WORK_DIR }}/${{ env.VERSION }}"
           mkdir -p $BUILD_DIR
           echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
-          #echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
+          echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
 
       - name: set image tags
         id: set-tags
@@ -71,6 +73,48 @@ jobs:
           TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: login to the registry
+        run: |
+          podman login ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }} \
+            --username ${{ secrets.REGISTRY_USERNAME }} \
+            --password ${{ secrets.REGISTRY_TOKEN }}
+
+      # build the container
+
+      - name: build the container
+        run: |
+          buildah bud -f "src/Containerfile" \
+            --tag ${{ steps.set-tags.outputs.tags }} \
+            --arch arm64 --layers \
+            "src"
+
+      - name: push to registry
+        run: |
+          podman push ${{ steps.set-tags.outputs.tags }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="${{ env.REGISTRY_ORG }}/radio-app:latest"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+          if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
+            RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
+            TAGS="${{ env.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+      # build the image
 
       - name: write the manifest
         uses: elieahd/templater@v1
@@ -104,6 +148,11 @@ jobs:
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
             && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
 
+      # cleanup
+
       - name: cleanup
         run: |
+          podman logout ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
           sudo rm -rf ${{ env.BUILD_DIR }}
