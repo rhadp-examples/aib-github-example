@@ -81,6 +81,7 @@ jobs:
 
       - name: build the autosd image
         run: |
+          echo $PWD
           CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
 
           OSBUILD_CMD="automotive-image-builder/automotive-image-builder \
