@@ -26,7 +26,7 @@ env:
   AIB_MODE: package # package image
   AIB_EXPORT_FORMAT: qcow2 # image qcow2 container
 
-  CACHESIZE: "1GB"
+  CACHESIZE: "2GB"
   BUILD_NAME: "output"
   BUILDER_IMAGE: quay.io/centos-sig-automotive/automotive-osbuild:latest
 
@@ -60,14 +60,21 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}"
 
-      - name: create temp build directories
+      - name: create directories
         run: |
-          BUILD_DIR="${{ env.WORK_DIR }}/${{ env.VERSION }}"
-          mkdir -p $BUILD_DIR
-
+          # create the image directory
           mkdir -p ${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY
 
+          # cache directory
+          CACHE_DIR="${{ env.WORK_DIR }}/$GITHUB_REPOSITORY/.cache"
+          mkdir -p $CACHE_DIR
+
+          # create the temporary build directory used by AIB
+          BUILD_DIR="${{ env.WORK_DIR }}/$GITHUB_REPOSITORY/${{ env.VERSION }}"
+          mkdir -p $BUILD_DIR
+
           echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
+          echo "CACHE_DIR=${CACHE_DIR}" >> $GITHUB_ENV
           echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
 
       - name: set image tags
@@ -126,7 +133,7 @@ jobs:
           file: ${{ env.BUILD_DIR }}/${{ env.MANIFEST_FILE }}
           variables: "WORKSPACE=$GITHUB_WORKSPACE VERSION=${{ env.VERSION }} ROOT_PASSWORD=${{ env.ROOT_PASSWORD }}"
 
-      - name: build the autosd image
+      - name: build the OS image
         run: |
           CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
 
@@ -138,6 +145,7 @@ jobs:
             --mode "${{ env.AIB_MODE }}" \
             --export "${{ env.AIB_EXPORT_FORMAT }}" \
             --build-dir="${{ env.BUILD_DIR }}" \
+            --cache="${{ env.CACHE_DIR }}" \
             --cache-max-size="${{ env.CACHESIZE }}" \
             --osbuild-manifest="${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.json" \
             "${{ env.BUILD_DIR }}/${{ env.MANIFEST_FILE }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}""
