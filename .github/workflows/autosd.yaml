@@ -13,12 +13,12 @@ env:
   REGISTRY: quay.io
   REGISTRY_ORG: quay.io/rhadp-examples
   
-  WORK_DIR: "/mnt/data/builds"
+  WORK_DIR: "/mnt/data/workspace"
   IMAGE_DIR: "/mnt/data/images"
   AIB_DIR: "/mnt/data/aib"
 
   # AIB parameters
-  MANIFEST: radioapp.aib.yml
+  MANIFEST_FILE: radioapp.aib.yml
 
   AIB_DISTRO: autosd9  # autosd cs9
   AIB_ARCH: aarch64 # aarch64 x86_64
@@ -73,12 +73,11 @@ jobs:
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: write the manifest
-        uses: cuchi/jinja2-action@v1.3.0
+        uses: elieahd/templater@v1
         with:
-          template: manifests${{ env.MANIFEST }}
-          output_file: ${{ env.BUILD_DIR }}/${{ env.MANIFEST }}
-        env:
-          ROOT_PASSWORD: ${{ env.ROOT_PASSWORD }}
+          template: manifests/${{ env.MANIFEST_FILE }}
+          file: ${{ env.BUILD_DIR }}/${{ env.MANIFEST_FILE }}
+          variables: "ROOT_PASSWORD=${{ env.ROOT_PASSWORD }} VERSION=${{ env.VERSION }}"
 
       - name: build the autosd image
         run: |
@@ -94,7 +93,7 @@ jobs:
             --build-dir="${{ env.BUILD_DIR }}" \
             --cache-max-size="${{ env.CACHESIZE }}" \
             --osbuild-manifest="${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.json" \
-            "${{ env.BUILD_DIR }}/${{ env.MANIFEST }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}""
+            "${{ env.BUILD_DIR }}/${{ env.MANIFEST_FILE }}" "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}""
 
           sudo podman run --rm --privileged --pull=newer --security-opt label=type:unconfined_t \
             -v /dev:/dev \

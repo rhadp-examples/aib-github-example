@@ -24,7 +24,7 @@ content:
 
   container_images:
     - source: quay.io/rhadp-examples/radio-app
-      tag: "{{ env['VERSION'] }}"
+      tag: "{{VERSION}}"
       name: localhost/app
 
   add_files:
@@ -46,4 +46,4 @@ content:
 
 auth:
   # "password"
-  root_password: "{{ env['ROOT_PASSWORD'] }}"
+  root_password: "{{ROOT_PASSWORD}}"

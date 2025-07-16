@@ -8,11 +8,7 @@ all:
 
     # github specific variables
     github_pat: "ghp_123456"
-    
     github_org: "rhadp-examples"
-    github_runner_name: "aib-runner"
-    github_runner_group: "aib-runners"
-    github_runner_labels: "self-hosted,arm64,aib"
 
     # cloud provider specific variables
     cloud_provider: "aws" # aws, azure, gcp

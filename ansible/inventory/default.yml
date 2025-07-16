@@ -4,9 +4,14 @@ all:
     
     # shared directories
     work_dir: "/mnt/data" # SHOULD match the additional storage device mount point
-    builds_temp_dir: "builds"
+    workspace_dir: "workspace"
     images_dir: "images"
     
+    # github specific variables
+    github_runner_name: "aib-runner"
+    github_runner_group: "aib-runners"
+    github_runner_labels: "self-hosted,arm64,aib"
+
     # application specific directories
     github_runner_dir: "github-runner"
     aib_work_dir: "aib"

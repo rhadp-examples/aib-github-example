@@ -13,7 +13,7 @@ env:
   REGISTRY: quay.io
   REGISTRY_ORG: quay.io/rhadp-examples
   
-  WORK_DIR: "/mnt/data/builds"
+  WORK_DIR: "/mnt/data/workspace"
 
 jobs:
   build-radio-application-container:
@@ -53,21 +53,6 @@ jobs:
           TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
-
-      - name: configure podman registries
-        run: |
-          # Create /etc/containers/nodocker to quiet the emulation message
-          sudo mkdir -p /etc/containers
-          echo "" | sudo tee /etc/containers/nodocker > /dev/null
-          
-          # Configure registries to fix short-name resolution
-          sudo tee /etc/containers/registries.conf << 'EOF'
-          [registries.search]
-          registries = ['docker.io', 'registry.redhat.io', 'quay.io']
-          
-          [registries.short-name-mode]
-          mode = "permissive"
-          EOF
 
       - name: login to the registry
         run: |

@@ -1,21 +1,30 @@
 # Implement your post-install deployment tasks here
 # -------------------------------------------------
 
-- name: create other directories
+
+# make sure that podman works in the same way as docker does ...
+
+- name: create nodocker file
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  shell: |
+    mkdir -p /etc/containers
+    touch /etc/containers/nodocker
+
+- name: create .docker directory
   delegate_to: "{{ instance_public_ip }}"
   become: true
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: ".docker"
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0755"
-  with_items:
-    - ".docker"
 
-- name: install additional python modules
+- name: copy registries.conf
   delegate_to: "{{ instance_public_ip }}"
   become: true
-  shell: |
-    pip install boto3
-
+  ansible.builtin.copy:
+    src: "../files/registries.conf"
+    dest: "/etc/containers/registries.conf"
+    mode: "0755"

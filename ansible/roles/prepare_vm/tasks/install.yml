@@ -1,6 +1,17 @@
 # Implement your install deployment tasks here
 # -------------------------------------------------
 
+- name: remove directories
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ work_dir }}/{{ item }}"
+    state: absent
+  with_items:
+    - "{{ aib_work_dir }}"
+    - "{{ github_runner_dir }}"
+    - "{{ workspace_dir }}"
+    
 - name: create directories for the aib runner
   delegate_to: "{{ instance_public_ip }}"
   become: true
@@ -12,9 +23,9 @@
     mode: "0755"
   with_items:
     - "{{ aib_work_dir }}"
-    - "{{ aib_work_dir }}/builds"
-    - "{{ aib_work_dir }}/.mpp-cache"
-    - "{{ builds_temp_dir }}"
+    - "{{ aib_work_dir }}/builds" # FIXME: remove this directory
+    - "{{ aib_work_dir }}/.mpp-cache" # FIXME: remove this directory
+    - "{{ workspace_dir }}"
     - "{{ images_dir }}"
 
 - name: clone the automotive-image-builder repo

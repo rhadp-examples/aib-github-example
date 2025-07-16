@@ -40,20 +40,13 @@
       - python3.12
       - python3-pip
       - buildah
+      - skopeo
+      - jq
+      - curl
       - dotnet-sdk-9.0
       - make
       - cmake
       - gcc
       - g++
 
-- name: remove directories
-  delegate_to: "{{ instance_public_ip }}"
-  become: true
-  ansible.builtin.file:
-    path: "{{ work_dir }}/{{ item }}"
-    state: absent
-  with_items:
-    - "{{ aib_work_dir }}"
-    - "{{ github_runner_dir }}"
-    - "{{ builds_temp_dir }}"
   
