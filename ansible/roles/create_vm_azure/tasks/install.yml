@@ -8,12 +8,12 @@
     location: "{{ azure_location }}"
     vm_size: "{{ vm_size }}"
     admin_username: "{{ vm_admin_username }}"
-    disable_password_authentication: true
-    network_interfaces: "{{ vm_name }}-nic"
+    ssh_password_enabled: false
+    network_interface_names:
+      - "{{ vm_name }}-nic"
     image: "{{ vm_image }}"
     os_disk_size_gb: "{{ boot_disk_size }}"
     managed_disk_type: Premium_LRS
-    ssh_password_enabled: false
     ssh_public_keys:
       - path: "/home/{{ vm_admin_username }}/.ssh/authorized_keys"
         key_data: "{{ lookup('file', '{{ remote_ssh_public_key_file }}') }}"
@@ -21,7 +21,6 @@
       - lun: 0
         disk_size_gb: "{{ additional_disk_size }}"
         managed_disk_type: Premium_LRS
-        storage_account_type: Premium_LRS
     state: present
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"

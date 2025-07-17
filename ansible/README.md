@@ -7,7 +7,9 @@ pip install -r requirements.txt
 ```
 
 # Install the Azure collection if not already installed
-ansible-galaxy collection install azure.azcollection
+ansible-galaxy collection install azure.azcollection --force
 
 # Install Python dependencies for the collection
 pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements.txt
+
+/root/.ansible/collections/ansible_collections/azure/azcollection

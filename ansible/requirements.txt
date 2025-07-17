@@ -1,1 +1,3 @@
-# nothing for now
+# Azure SDK dependencies for azure.azcollection
+
+ansible[azure]>=6.0.0

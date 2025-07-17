@@ -2,6 +2,7 @@
 # -------------------------------------------------
 
 - name: create resource group
+  ignore_errors: true
   azure.azcollection.azure_rm_resourcegroup:
     name: "{{ resource_group_name }}"
     location: "{{ azure_location }}"
@@ -92,13 +93,15 @@
     name: "{{ vm_name }}-nic"
     location: "{{ azure_location }}"
     virtual_network: "{{ vnet_name }}"
-    subnet: "{{ subnet_name }}"
-    public_ip_name: "{{ vm_name }}-pip"
+    subnet_name: "{{ subnet_name }}"
     security_group: "{{ nsg_name }}"
+    ip_configurations:
+      - name: "{{ vm_name }}-ipconfig"
+        public_ip_address_name: "{{ vm_name }}-pip"
+        primary: true
     state: present
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
     tenant: "{{ azure_tenant }}"
     subscription_id: "{{ azure_subscription }}"
   register: nic
-
