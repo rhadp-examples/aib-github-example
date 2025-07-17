@@ -1,0 +1,104 @@
+# Implement your pre-install deployment tasks here
+# -------------------------------------------------
+
+- name: create resource group
+  azure.azcollection.azure_rm_resourcegroup:
+    name: "{{ resource_group_name }}"
+    location: "{{ azure_location }}"
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: resource_group
+
+- name: create virtual network
+  azure.azcollection.azure_rm_virtualnetwork:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vnet_name }}"
+    address_prefixes: "{{ vnet_cidr }}"
+    location: "{{ azure_location }}"
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: vnet
+
+- name: create subnet
+  azure.azcollection.azure_rm_subnet:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ subnet_name }}"
+    address_prefix: "{{ subnet_cidr }}"
+    virtual_network: "{{ vnet_name }}"
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: subnet
+
+- name: create network security group
+  azure.azcollection.azure_rm_securitygroup:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ nsg_name }}"
+    location: "{{ azure_location }}"
+    rules:
+      - name: "AllowSSH"
+        protocol: Tcp
+        destination_port_range: "22"
+        access: Allow
+        priority: 100
+        direction: Inbound
+        source_address_prefix: "0.0.0.0/0"
+      - name: "AllowHTTP"
+        protocol: Tcp
+        destination_port_range: "80"
+        access: Allow
+        priority: 110
+        direction: Inbound
+        source_address_prefix: "0.0.0.0/0"
+      - name: "AllowHTTPS"
+        protocol: Tcp
+        destination_port_range: "443"
+        access: Allow
+        priority: 120
+        direction: Inbound
+        source_address_prefix: "0.0.0.0/0"
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: nsg
+
+- name: create public IP address
+  azure.azcollection.azure_rm_publicipaddress:
+    resource_group: "{{ resource_group_name }}"
+    allocation_method: Static
+    name: "{{ vm_name }}-pip"
+    location: "{{ azure_location }}"
+    sku: Standard
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: public_ip
+
+- name: create network interface
+  azure.azcollection.azure_rm_networkinterface:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vm_name }}-nic"
+    location: "{{ azure_location }}"
+    virtual_network: "{{ vnet_name }}"
+    subnet: "{{ subnet_name }}"
+    public_ip_name: "{{ vm_name }}-pip"
+    security_group: "{{ nsg_name }}"
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: nic
+

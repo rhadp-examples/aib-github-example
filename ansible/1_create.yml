@@ -7,15 +7,26 @@
     ACTION: "INSTALL" # INSTALL, UNINSTALL, UPDATE
 
   tasks:
-    - name: create the vm
+    - name: create the vm (AWS)
       include_role:
         name: roles/create_vm_aws
       when: cloud_provider == "aws"
+
+    - name: create the vm (Azure)
+      include_role:
+        name: roles/create_vm_azure
+      when: cloud_provider == "azure"
         
     - name: prepare the vm
       include_role:
         name: roles/prepare_vm
 
-    - name: show login command
+    - name: show login command (AWS)
       debug:
         msg: "ssh -i {{ ansible_ssh_private_key_file }} {{ ansible_user }}@{{ instance_public_dns }}"
+      when: cloud_provider == "aws"
+
+    - name: show login command (Azure)
+      debug:
+        msg: "ssh -i {{ ansible_ssh_private_key_file }} azureuser@{{ vm_public_ip }}"
+      when: cloud_provider == "azure"

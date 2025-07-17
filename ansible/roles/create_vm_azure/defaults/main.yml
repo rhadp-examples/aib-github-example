@@ -1,0 +1,39 @@
+---
+# defaults for Azure VM creation
+# Note: Many variables are inherited from inventory/main.yml including:
+# - azure_guid, azure_resourcegroup, ansible_user, remote_ssh_public_key_file
+# - azure_client_id, azure_password, azure_tenant, azure_subscription
+
+vm_size: "Standard_D2ps_v5"  # ARM-based Azure VM, 2 vCPU, 8 GiB RAM
+boot_disk_size: 30
+additional_disk_size: 100
+volume_mount_point: "/mnt/data"
+
+# Azure location
+azure_location: "East US 2"  # Supports ARM64 VMs
+
+# Resource group configuration
+resource_group_name: "{{ azure_resourcegroup | default('rg-rhel-arm-' + azure_guid | default('default')) }}"
+
+# Network configuration
+vnet_name: "vnet-rhel-arm-{{ azure_guid | default('default') }}"
+vnet_cidr: "10.0.0.0/16"
+subnet_name: "subnet-rhel-arm-{{ azure_guid | default('default') }}"
+subnet_cidr: "10.0.1.0/24"
+
+# Security group configuration
+nsg_name: "nsg-rhel-arm-{{ azure_guid | default('default') }}"
+
+# VM configuration
+vm_name: "vm-rhel-arm-{{ azure_guid | default('default') }}"
+vm_admin_username: "{{ ansible_user | default('azureuser') }}"
+
+# Image configuration for RHEL 10 ARM64
+vm_image:
+  publisher: "RedHat"
+  offer: "RHEL"
+  sku: "10-gen2"  # RHEL 10
+  version: "latest"
+
+# SSH key configuration
+ssh_key_name: "ssh-key-rhel-arm"

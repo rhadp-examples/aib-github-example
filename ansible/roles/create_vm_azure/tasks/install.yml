@@ -1,0 +1,59 @@
+# Implement your install deployment tasks here
+# -------------------------------------------------
+
+- name: create virtual machine
+  azure.azcollection.azure_rm_virtualmachine:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vm_name }}"
+    location: "{{ azure_location }}"
+    vm_size: "{{ vm_size }}"
+    admin_username: "{{ vm_admin_username }}"
+    disable_password_authentication: true
+    network_interfaces: "{{ vm_name }}-nic"
+    image: "{{ vm_image }}"
+    os_disk_size_gb: "{{ boot_disk_size }}"
+    managed_disk_type: Premium_LRS
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/{{ vm_admin_username }}/.ssh/authorized_keys"
+        key_data: "{{ lookup('file', '{{ remote_ssh_public_key_file }}') }}"
+    data_disks:
+      - lun: 0
+        disk_size_gb: "{{ additional_disk_size }}"
+        managed_disk_type: Premium_LRS
+        storage_account_type: Premium_LRS
+    state: present
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: vm
+
+- name: get public IP address
+  azure.azcollection.azure_rm_publicipaddress_info:
+    resource_group: "{{ resource_group_name }}"
+    name: "{{ vm_name }}-pip"
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_password }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription }}"
+  register: pip_info
+
+- name: set public ip fact
+  set_fact:
+    instance_public_ip: "{{ pip_info.publicipaddresses[0].ip_address }}"
+
+- name: wait for ssh to be available on the new instance
+  wait_for:
+    host: "{{ instance_public_ip }}"
+    port: 22
+    delay: 30
+    timeout: 600
+    state: started
+
+- name: add host key to known_hosts
+  known_hosts:
+    name: "{{ instance_public_ip }}"
+    key: "{{ lookup('pipe', 'ssh-keyscan -H ' + instance_public_ip) }}"
+    state: present
+
