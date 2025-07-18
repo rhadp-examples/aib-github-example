@@ -28,3 +28,57 @@
     src: "../files/registries.conf"
     dest: "/etc/containers/registries.conf"
     mode: "0755"
+
+# configure podman to use storage on the additional disk
+
+- name: create container storage directory on additional disk
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ work_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  with_items:
+    - "containers/system"
+    - "containers/run/system"
+
+- name: copy global storage.conf
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  ansible.builtin.copy:
+    src: "../files/storage.conf"
+    dest: "/etc/containers/storage.conf"
+    mode: "0644"
+
+- name: create containers directory for user
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ work_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+  with_items:
+    - "containers/user"
+    - "containers/run/user"
+
+- name: create user config directory
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.config/containers"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: copy user storage.conf
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  ansible.builtin.copy:
+    src: "../files/storage-user.conf"
+    dest: "/home/{{ ansible_user }}/.config/containers/storage.conf"
+    mode: "0644"
