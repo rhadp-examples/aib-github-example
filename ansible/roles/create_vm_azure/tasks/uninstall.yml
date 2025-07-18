@@ -128,14 +128,14 @@
     subscription_id: "{{ azure_subscription }}"
   ignore_errors: true
 
-- name: delete resource group
-  azure.azcollection.azure_rm_resourcegroup:
-    name: "{{ resource_group_name }}"
-    state: absent
-    force_delete_nonempty: true
-    client_id: "{{ azure_client_id }}"
-    secret: "{{ azure_password }}"
-    tenant: "{{ azure_tenant }}"
-    subscription_id: "{{ azure_subscription }}"
-  ignore_errors: true
+#- name: delete resource group
+#  azure.azcollection.azure_rm_resourcegroup:
+#    name: "{{ resource_group_name }}"
+#    state: absent
+#    force_delete_nonempty: true
+#    client_id: "{{ azure_client_id }}"
+#    secret: "{{ azure_password }}"
+#    tenant: "{{ azure_tenant }}"
+#    subscription_id: "{{ azure_subscription }}"
+#  ignore_errors: true
 

@@ -1,3 +1,6 @@
+# Ansible Azure Setup
+
+## Setup Instructions
 
 Create a Python virtual environment (recommended):
 ```bash
@@ -6,10 +9,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Install the Azure collection
+
+```bash
 # Install the Azure collection if not already installed
 ansible-galaxy collection install azure.azcollection --force
-
-# Install Python dependencies for the collection
+```
+```bash
 pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements.txt
+```
 
-/root/.ansible/collections/ansible_collections/azure/azcollection
+
