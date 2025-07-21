@@ -36,7 +36,7 @@
     ./config.sh --unattended \
       --url https://github.com/{{ github_org }} \
       --token $TOKEN \
-      --name "{{ github_runner_name }}" \
+      --name "{{ instance_name }}" \
       --runnergroup "{{ github_runner_group }}" \
       --labels "{{ github_runner_labels }}" \
       --replace
