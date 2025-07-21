@@ -1,16 +1,10 @@
 ---
-# defaults for Azure VM creation
-# Note: Many variables are inherited from inventory/main.yml including:
-# - azure_guid, azure_resourcegroup, ansible_user, remote_ssh_public_key_file
-# - azure_client_id, azure_password, azure_tenant, azure_subscription
+create_resource_group: false
 
 vm_size: "Standard_D4ps_v5"  # ARM-based Azure VM, 4 vCPU, 16 GiB RAM
 boot_disk_size: 64
 additional_disk_size: 100
 volume_mount_point: "/mnt/data"
-
-# Azure location
-azure_location: "East US 2"  # Supports ARM64 VMs
 
 # Resource group configuration
 resource_group_name: "{{ azure_resourcegroup }}"

@@ -3,7 +3,7 @@ all:
     instance_name: "rhel-arm-instance"
     
     # shared directories
-    work_dir: "/mnt/data" # SHOULD match the additional storage device mount point
+    work_dir: "/mnt/data"
     workspace_dir: "workspace"
     images_dir: "images"
     
