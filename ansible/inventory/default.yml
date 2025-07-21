@@ -14,7 +14,6 @@ all:
     images_dir: "images"
     
     # github specific variables
-    github_runner_name: "aib-runner"
     github_runner_group: "aib-runners"
     github_runner_labels: "self-hosted,arm64,aib"
 
