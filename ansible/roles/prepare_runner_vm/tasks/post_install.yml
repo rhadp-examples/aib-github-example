@@ -1,7 +1,6 @@
 # Implement your post-install deployment tasks here
 # -------------------------------------------------
 
-
 # make sure that podman works in the same way as docker does ...
 
 - name: create nodocker file
@@ -29,7 +28,7 @@
     dest: "/etc/containers/registries.conf"
     mode: "0755"
 
-# configure podman to use storage on the additional disk
+# configure podman to use storage on the additional disk, avoids out-of-disk-space issues
 
 - name: create container storage directory on additional disk
   delegate_to: "{{ instance_public_ip }}"
@@ -83,7 +82,9 @@
     dest: "/home/{{ ansible_user }}/.config/containers/storage.conf"
     mode: "0644"
 
-- name: re-label graphRoot # see https://access.redhat.com/solutions/7021610
+# fix selinux issues, see https://access.redhat.com/solutions/7021610
+
+- name: re-label graphRoot
   delegate_to: "{{ instance_public_ip }}"
   become: true
   shell: |

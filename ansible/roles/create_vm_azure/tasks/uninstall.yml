@@ -3,8 +3,8 @@
 
 - name: get virtual machine information
   azure.azcollection.azure_rm_virtualmachine_info:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}"
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
     tenant: "{{ azure_tenant }}"
@@ -14,8 +14,8 @@
 
 - name: delete virtual machine
   azure.azcollection.azure_rm_virtualmachine:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}"
     state: absent
     remove_on_absent: ["all"]
     client_id: "{{ azure_client_id }}"
@@ -27,8 +27,8 @@
 
 - name: delete data disks
   azure.azcollection.azure_rm_manageddisk:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}_DataDisk_0"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}_DataDisk_0"
     state: absent
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
@@ -38,8 +38,8 @@
 
 - name: delete OS disk
   azure.azcollection.azure_rm_manageddisk:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}_OsDisk_1_{{ ansible_date_time.epoch }}"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}_OsDisk_1_{{ ansible_date_time.epoch }}"
     state: absent
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
@@ -49,7 +49,7 @@
 
 - name: get all managed disks in resource group
   azure.azcollection.azure_rm_manageddisk_info:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
     tenant: "{{ azure_tenant }}"
@@ -59,7 +59,7 @@
 
 - name: delete all managed disks with vm name prefix
   azure.azcollection.azure_rm_manageddisk:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ item.name }}"
     state: absent
     client_id: "{{ azure_client_id }}"
@@ -69,13 +69,13 @@
   loop: "{{ disk_info.disks }}"
   when: 
     - disk_info.disks is defined
-    - item.name is search(vm_name)
+    - item.name is search(instance_name)
   ignore_errors: true
 
 - name: delete network interface
   azure.azcollection.azure_rm_networkinterface:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}-nic"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}-nic"
     state: absent
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
@@ -85,8 +85,8 @@
 
 - name: delete public IP address
   azure.azcollection.azure_rm_publicipaddress:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}-pip"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}-pip"
     state: absent
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"
@@ -96,7 +96,7 @@
 
 - name: delete network security group
   azure.azcollection.azure_rm_securitygroup:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ nsg_name }}"
     state: absent
     client_id: "{{ azure_client_id }}"
@@ -107,7 +107,7 @@
 
 - name: delete subnet
   azure.azcollection.azure_rm_subnet:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ subnet_name }}"
     virtual_network: "{{ vnet_name }}"
     state: absent
@@ -119,7 +119,7 @@
 
 - name: delete virtual network
   azure.azcollection.azure_rm_virtualnetwork:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ vnet_name }}"
     state: absent
     client_id: "{{ azure_client_id }}"
@@ -131,7 +131,7 @@
 - name: delete resource group
   when: create_resource_group
   azure.azcollection.azure_rm_resourcegroup:
-    name: "{{ resource_group_name }}"
+    name: "{{ azure_resource_group }}"
     state: absent
     force_delete_nonempty: true
     client_id: "{{ azure_client_id }}"

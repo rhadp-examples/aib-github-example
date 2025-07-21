@@ -4,7 +4,7 @@
 - name: create resource group
   when: create_resource_group
   azure.azcollection.azure_rm_resourcegroup:
-    name: "{{ resource_group_name }}"
+    name: "{{ azure_resource_group }}"
     location: "{{ azure_location }}"
     state: present
     client_id: "{{ azure_client_id }}"
@@ -15,7 +15,7 @@
 
 - name: create virtual network
   azure.azcollection.azure_rm_virtualnetwork:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ vnet_name }}"
     address_prefixes: "{{ vnet_cidr }}"
     location: "{{ azure_location }}"
@@ -28,7 +28,7 @@
 
 - name: create subnet
   azure.azcollection.azure_rm_subnet:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ subnet_name }}"
     address_prefix: "{{ subnet_cidr }}"
     virtual_network: "{{ vnet_name }}"
@@ -41,7 +41,7 @@
 
 - name: create network security group
   azure.azcollection.azure_rm_securitygroup:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     name: "{{ nsg_name }}"
     location: "{{ azure_location }}"
     rules:
@@ -75,9 +75,9 @@
 
 - name: create public IP address
   azure.azcollection.azure_rm_publicipaddress:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     allocation_method: Static
-    name: "{{ vm_name }}-pip"
+    name: "{{ instance_name }}-pip"
     location: "{{ azure_location }}"
     sku: Standard
     state: present
@@ -89,15 +89,15 @@
 
 - name: create network interface
   azure.azcollection.azure_rm_networkinterface:
-    resource_group: "{{ resource_group_name }}"
-    name: "{{ vm_name }}-nic"
+    resource_group: "{{ azure_resource_group }}"
+    name: "{{ instance_name }}-nic"
     location: "{{ azure_location }}"
     virtual_network: "{{ vnet_name }}"
     subnet_name: "{{ subnet_name }}"
     security_group: "{{ nsg_name }}"
     ip_configurations:
-      - name: "{{ vm_name }}-ipconfig"
-        public_ip_address_name: "{{ vm_name }}-pip"
+      - name: "{{ instance_name }}-ipconfig"
+        public_ip_address_name: "{{ instance_name }}-pip"
         primary: true
     state: present
     client_id: "{{ azure_client_id }}"

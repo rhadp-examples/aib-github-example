@@ -1,4 +1,4 @@
-name: build application container image
+name: build application containers
 on:
   workflow_dispatch:
 

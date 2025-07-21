@@ -7,7 +7,7 @@
     image_id: "{{ aws_image_id }}"
     vpc_subnet_id: "{{ subnet.subnet.id }}"
     security_group: "{{ security_group.group_id }}"
-    key_name: "{{ keypair_name }}"
+    key_name: "{{ ssh_key_name }}"
     network_interfaces:
       - assign_public_ip: true
     volumes:

@@ -1,4 +1,4 @@
-name: build base container images
+name: build base containers
 on:
   workflow_dispatch:
   

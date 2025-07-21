@@ -4,25 +4,25 @@
 # see https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_virtualmachine_module.html
 - name: create virtual machine
   azure.azcollection.azure_rm_virtualmachine:
-    name: "{{ vm_name }}"
+    name: "{{ instance_name }}"
     location: "{{ azure_location }}"
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ azure_resource_group }}"
     image: "{{ vm_image }}"
     vm_size: "{{ vm_size }}"
-    admin_username: "{{ vm_admin_username }}"
+    admin_username: "{{ ansible_user }}"
     ssh_password_enabled: false
     ssh_public_keys:
-      - path: "/home/{{ vm_admin_username }}/.ssh/authorized_keys"
+      - path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
         key_data: "{{ lookup('file', '{{ remote_ssh_public_key_file }}') }}"
     network_interface_names:
-      - "{{ vm_name }}-nic"
+      - "{{ instance_name }}-nic"
     managed_disk_type: "Premium_LRS"
-    os_disk_name: "{{ vm_name }}-os"
+    os_disk_name: "{{ instance_name }}-os"
     os_disk_size_gb: "{{ boot_disk_size }}"
     os_disk_caching: "ReadOnly"
     data_disks:
       - lun: 0
-        name: "{{ vm_name }}-data"
+        name: "{{ instance_name }}-data"
         managed_disk_type: "Premium_LRS"
         disk_size_gb: "{{ additional_disk_size }}"
         caching: "ReadWrite"
@@ -36,8 +36,8 @@
 
 - name: get public IP address
   azure.azcollection.azure_rm_publicipaddress_info:
-    name: "{{ vm_name }}-pip"
-    resource_group: "{{ resource_group_name }}"
+    name: "{{ instance_name }}-pip"
+    resource_group: "{{ azure_resource_group }}"
     # azure credentials
     client_id: "{{ azure_client_id }}"
     secret: "{{ azure_password }}"

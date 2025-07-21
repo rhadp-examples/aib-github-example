@@ -3,7 +3,6 @@
 instance_type: "m6g.xlarge" # ARM-based AWS Graviton2, 4 vCPU, 16 GiB RAM
 boot_volume_size: 20
 additional_volume_size: 100
-volume_mount_point: "/mnt/data"
 
 # vpc configuration
 vpc_name: "rhel-arm-vpc"
@@ -16,4 +15,3 @@ subnet_cidr: "10.0.1.0/24"
 # names for the resources
 security_group_name: "rhel-arm-sg"
 security_group_description: "Security group for RHEL ARM instance"
-keypair_name: "rhel-arm-keypair"

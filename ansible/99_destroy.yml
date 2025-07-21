@@ -7,9 +7,13 @@
     ACTION: "UNINSTALL" # INSTALL, UNINSTALL, UPDATE
 
   tasks:
+    - name: gather facts
+      include_role:
+        name: roles/gather_vm_facts
+
     - name: remove the github runner
       include_role:
-        name: roles/prepare_vm
+        name: roles/github_runner
         
     - name: delete the vm (AWS)
       include_role:

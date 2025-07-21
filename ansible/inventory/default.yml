@@ -1,9 +1,15 @@
 all:
   vars:
-    instance_name: "rhel-arm-instance"
+    instance_name: "vm-rhel-aib"
     
+    # SSH key configuration
+    ssh_key_name: "ssh-rhel-aib"
+
+    # data volume
+    volume_mount_point: "/mnt/data"
+
     # shared directories
-    work_dir: "/mnt/data"
+    work_dir: "/mnt/data" # SHOULD be the same as volume_mount_point
     workspace_dir: "workspace"
     images_dir: "images"
     
