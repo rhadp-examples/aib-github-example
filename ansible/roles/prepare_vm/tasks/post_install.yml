@@ -82,3 +82,13 @@
     src: "../files/storage-user.conf"
     dest: "/home/{{ ansible_user }}/.config/containers/storage.conf"
     mode: "0644"
+
+- name: re-label graphRoot # see https://access.redhat.com/solutions/7021610
+  delegate_to: "{{ instance_public_ip }}"
+  become: true
+  shell: |
+    semanage fcontext -a -e /var/lib/containers /mnt/data/containers/system
+    restorecon -R -v /mnt/data/containers/system
+
+    semanage fcontext -a -e /var/lib/containers /mnt/data/containers/user
+    restorecon -R -v /mnt/data/containers/user
