@@ -1,7 +1,5 @@
 all:
   vars:
-    instance_name: "vm-rhel-aib"
-    
     # SSH key configuration
     ssh_key_name: "ssh-rhel-aib"
 
