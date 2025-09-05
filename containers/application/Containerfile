@@ -1,6 +1,40 @@
 FROM quay.io/rhadp/builder:latest
 
-RUN dnf install -y socat vsomeip3 vsomeip3-devel vsomeip3-routingmanager dlt-daemon dlt-tools dlt-libs dlt-libs-devel && \
-    dnf install -y boost-devel boost-system boost-thread boost-log boost-chrono boost-date-time boost-atomic boost-filesystem boost-regex && \
-    dnf clean all && \
+# boost and its dependencies
+ARG BOOST_VERSION=1.78
+
+RUN dnf install -y bzip2-devel zlib-devel libicu-devel
+
+#RUN ARCH=$(uname -m) && \
+#    curl -O http://dl.fedoraproject.org/pub/epel/9/Everything/${ARCH}/Packages/b/boost${BOOST_VERSION}-${BOOST_VERSION}.0-1.el9.${ARCH}.rpm && \
+#    rpm -Uvh boost${BOOST_VERSION}-${BOOST_VERSION}.0-1.el9.${ARCH}.rpm && \
+#    rm -f boost${BOOST_VERSION}-${BOOST_VERSION}.0-1.el9.${ARCH}.rpm
+
+# [   ] boost1.78-devel-1.78.0-1.el9.aarch64.rpm
+#  boost1.78-1.78.0-1.el9.aarch64.rpm 
+
+RUN dnf install -y boost${BOOST_VERSION}-devel boost${BOOST_VERSION}-filesystem boost${BOOST_VERSION}-thread
+
+#RUN dnf install -y kernel-headers openssl-devel perl-IPC-Cmd
+#RUN vcpkg install boost-filesystem
+
+# Build vsomeip from source
+# Install build dependencies
+RUN dnf install -y socat dlt-daemon dlt-tools dlt-libs dlt-libs-devel
+
+# Clone and build vsomeip
+WORKDIR /tmp
+RUN git clone https://github.com/COVESA/vsomeip.git && \
+    cd vsomeip && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd / && \
+    rm -rf /tmp/vsomeip
+
+# Clean up package manager cache
+RUN dnf clean all && \
     rm -rf /var/cache/dnf

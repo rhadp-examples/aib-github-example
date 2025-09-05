@@ -1,3 +1,13 @@
 {
-    "image": "quay.io/rhadp/codespaces:latest"
+    "image": "quay.io/rhadp/codespaces:latest",
+    "remoteUser": "user",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "cmake.sourceDirectory": "${workspaceFolder}/src",
+                "cmake.buildDirectory": "${workspaceFolder}/build"
+            }
+        }
+    },
+    "postCreateCommand": "mkdir -p ~/.ssh && echo $BUILDER_PRIVATE_KEY > ~/.ssh/builder-private-key && chmod 600 ~/.ssh/builder-private-key"
 }
