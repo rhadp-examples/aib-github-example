@@ -4,10 +4,10 @@ on:
 
   pull_request:
     branches:
-      - develop
+      - develop2
   push:
     branches:
-      - develop
+      - develop2
 
 env:
   REGISTRY: "${{ vars.REGISTRY }}"
