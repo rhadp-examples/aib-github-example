@@ -4,18 +4,19 @@ on:
 
   pull_request:
     branches:
-      - develop
+      - main
   push:
     branches:
-      - develop
+      - main
 
 env:
-  #REGISTRY: "${{ vars.REGISTRY }}"
-  #REGISTRY_ORG: "${{ vars.REGISTRY_ORG }}"
-  
+  # working dirs
   WORK_DIR: "/mnt/data/workspace"
   IMAGE_DIR: "/mnt/data/images"
   AIB_DIR: "/mnt/data/aib"
+
+  # container build parameters
+  ARCH: "arm64"
 
   # AIB parameters
   MANIFEST_FILE: radioapp.aib.yml
@@ -30,7 +31,7 @@ env:
   BUILD_NAME: "output"
   BUILDER_IMAGE: quay.io/centos-sig-automotive/automotive-osbuild:latest
 
-  # import secrets
+  # import all secrets/envs needed to render the manifest file
   ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
 
 jobs:
@@ -101,10 +102,10 @@ jobs:
         run: |
           buildah bud -f "src/Containerfile" \
             --tag ${{ steps.set-tags.outputs.tags }} \
-            --arch arm64 --layers \
+            --arch ${{ env.ARCH }} --layers \
             "src"
 
-      - name: push to registry
+      - name: push the container to the registry
         run: |
           podman push ${{ steps.set-tags.outputs.tags }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
@@ -168,7 +169,7 @@ jobs:
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
             && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
 
-      - name: upload OS image
+      - name: upload the OS image
         run: |
           aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ vars.ARTEFACT_BUCKET }}/${{ env.FQN_BUILD_NAME }}"
         env:
@@ -177,7 +178,7 @@ jobs:
           
       # cleanup
 
-      - name: remove OS image
+      - name: remove the OS image
         run: |
           rm "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
 

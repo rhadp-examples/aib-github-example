@@ -1,0 +1,112 @@
+name: build application container
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+
+env:
+  # working dirs
+  WORK_DIR: "/mnt/data/workspace"
+
+  # container build parameters
+  ARCH: "arm64"
+  
+jobs:
+  build-application-container:
+    runs-on:
+      group: aib-runners
+      labels: [self-hosted, Linux, ARM64, aib]
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # prepare the environment
+      
+      - name: get version
+        run: |
+          VERSION="$(git rev-parse --short HEAD)"
+          VERSION=${VERSION#v} # remove the leading v prefix for version
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}"
+
+      - name: install dependencies
+        run: |
+          pip install -r .scripts/requirements.txt
+
+      - name: create temp build directory
+        run: |
+          BUILD_DIR="${{ env.WORK_DIR }}/$GITHUB_REPOSITORY/${{ env.VERSION }}"
+          mkdir -p $BUILD_DIR
+
+          echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
+          echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
+
+      - name: set image tags
+        id: set-tags
+        run: |
+          TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: login to the registry
+        run: |
+          podman login ${{ vars.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }} \
+            --username ${{ secrets.REGISTRY_USERNAME }} \
+            --password ${{ secrets.REGISTRY_TOKEN }}
+
+      # build the container
+
+      - name: build the container
+        run: |
+          buildah bud -f "src/Containerfile" \
+            --tag ${{ steps.set-tags.outputs.tags }} \
+            --arch ${{ env.ARCH }} --layers \
+            "src"
+
+      - name: push the container to the registry
+        run: |
+          podman push ${{ steps.set-tags.outputs.tags }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="${{ vars.REGISTRY_ORG }}/radio-app:latest"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+
+          if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
+            RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
+            TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
+            
+            podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
+            
+            podman push $TAGS \
+              --authfile ${{ env.PODMAN_AUTH_FILE }}
+          fi
+          
+      # cleanup
+
+      - name: logout of the registry
+        run: |
+          podman logout ${{ vars.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          sudo rm -rf ${{ env.BUILD_DIR }}
