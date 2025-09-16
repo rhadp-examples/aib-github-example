@@ -63,6 +63,10 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}"
 
+      - name: install dependencies
+        run |
+          pip install -r .scripts/requirements.txt
+
       - name: create directories
         run: |
           # create the image directory
@@ -115,14 +119,21 @@ jobs:
           echo "CANONICAL_BUILD_NAME=${CANONICAL_BUILD_NAME}" >> $GITHUB_ENV
           echo "FQN_BUILD_NAME=${FQN_BUILD_NAME}" >> $GITHUB_ENV
 
-      - name: upload artefact
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          source_dir: "${{ env.BUILD_DIR }}"
-          destination_dir: "$GITHUB_REPOSITORY"
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_bucket: ${{ env.ARTEFACT_BUCKET }}
+      #- name: upload artefact
+      #  uses: shallwefootball/s3-upload-action@master
+      #  with:
+      #    source_dir: "${{ env.BUILD_DIR }}"
+      #    destination_dir: "$GITHUB_REPOSITORY"
+      #    aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #    aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #    aws_bucket: ${{ env.ARTEFACT_BUCKET }}
+
+      - name: upload artefacts
+        run |
+          aws s3 cp "${{ env.PODMAN_AUTH_FILE }}" "s3://${{ env.ARTEFACT_BUCKET }}/$GITHUB_REPOSITORY"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       # cleanup
 
