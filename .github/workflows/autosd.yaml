@@ -10,8 +10,8 @@ on:
       - develop
 
 env:
-  REGISTRY: quay.io
-  REGISTRY_ORG: quay.io/rhadp-examples
+  #REGISTRY: "${{ vars.REGISTRY }}"
+  #REGISTRY_ORG: "${{ vars.REGISTRY_ORG }}"
   
   WORK_DIR: "/mnt/data/workspace"
   IMAGE_DIR: "/mnt/data/images"
@@ -84,13 +84,13 @@ jobs:
       - name: set image tags
         id: set-tags
         run: |
-          TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
+          TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: login to the registry
         run: |
-          podman login ${{ env.REGISTRY }} \
+          podman login ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }} \
             --username ${{ secrets.REGISTRY_USERNAME }} \
             --password ${{ secrets.REGISTRY_TOKEN }}
@@ -110,7 +110,7 @@ jobs:
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="${{ env.REGISTRY_ORG }}/radio-app:latest"
+            TAGS="${{ vars.REGISTRY_ORG }}/radio-app:latest"
             
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
@@ -120,7 +120,7 @@ jobs:
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="${{ env.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
+            TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
             
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
@@ -170,7 +170,7 @@ jobs:
 
       - name: upload OS image
         run: |
-          aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ env.ARTEFACT_BUCKET }}/$GITHUB_REPOSITORY/${{ env.FQN_BUILD_NAME }}"
+          aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ vars.ARTEFACT_BUCKET }}/$GITHUB_REPOSITORY/${{ env.FQN_BUILD_NAME }}"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -179,7 +179,7 @@ jobs:
 
       - name: cleanup
         run: |
-          podman logout ${{ env.REGISTRY }} \
+          podman logout ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
           sudo rm -rf ${{ env.BUILD_DIR }}
