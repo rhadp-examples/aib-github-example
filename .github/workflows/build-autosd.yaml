@@ -10,12 +10,13 @@ on:
       - main
 
 env:
-  REGISTRY: quay.io
-  REGISTRY_ORG: quay.io/rhadp-examples
-  
+  # working dirs
   WORK_DIR: "/mnt/data/workspace"
   IMAGE_DIR: "/mnt/data/images"
   AIB_DIR: "/mnt/data/aib"
+
+  # container build parameters
+  ARCH: "arm64"
 
   # AIB parameters
   MANIFEST_FILE: radioapp.aib.yml
@@ -30,7 +31,7 @@ env:
   BUILD_NAME: "output"
   BUILDER_IMAGE: quay.io/centos-sig-automotive/automotive-osbuild:latest
 
-  # import secrets
+  # import all secrets/envs needed to render the manifest file
   ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
 
 jobs:
@@ -60,6 +61,10 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}"
 
+      - name: install dependencies
+        run: |
+          pip install -r .scripts/requirements.txt
+
       - name: create directories
         run: |
           # create the image directory
@@ -80,13 +85,13 @@ jobs:
       - name: set image tags
         id: set-tags
         run: |
-          TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
+          TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: login to the registry
         run: |
-          podman login ${{ env.REGISTRY }} \
+          podman login ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }} \
             --username ${{ secrets.REGISTRY_USERNAME }} \
             --password ${{ secrets.REGISTRY_TOKEN }}
@@ -97,16 +102,16 @@ jobs:
         run: |
           buildah bud -f "src/Containerfile" \
             --tag ${{ steps.set-tags.outputs.tags }} \
-            --arch arm64 --layers \
+            --arch ${{ env.ARCH }} --layers \
             "src"
 
-      - name: push to registry
+      - name: push the container to the registry
         run: |
           podman push ${{ steps.set-tags.outputs.tags }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="${{ env.REGISTRY_ORG }}/radio-app:latest"
+            TAGS="${{ vars.REGISTRY_ORG }}/radio-app:latest"
             
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
@@ -116,7 +121,7 @@ jobs:
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")
-            TAGS="${{ env.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
+            TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${RELEASE_BRANCH_NAME}"
             
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
@@ -136,6 +141,10 @@ jobs:
       - name: build the OS image
         run: |
           CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
+          FQN_BUILD_NAME=$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}
+                                             
+          echo "CANONICAL_BUILD_NAME=${CANONICAL_BUILD_NAME}" >> $GITHUB_ENV
+          echo "FQN_BUILD_NAME=${FQN_BUILD_NAME}" >> $GITHUB_ENV
 
           OSBUILD_CMD="automotive-image-builder/automotive-image-builder \
             --verbose build \
@@ -160,11 +169,22 @@ jobs:
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
             && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
 
+      - name: upload the OS image
+        run: |
+          aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ vars.ARTEFACT_BUCKET }}/${{ env.FQN_BUILD_NAME }}"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
       # cleanup
 
-      - name: cleanup
+      - name: remove the OS image
         run: |
-          podman logout ${{ env.REGISTRY }} \
+          rm "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
+
+      - name: logout of the registry
+        run: |
+          podman logout ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
           sudo rm -rf ${{ env.BUILD_DIR }}
