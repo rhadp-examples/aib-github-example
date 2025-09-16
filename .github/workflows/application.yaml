@@ -2,12 +2,12 @@ name: build application containers
 on:
   workflow_dispatch:
 
-  pull_request:
-    branches:
-      - develop
-  push:
-    branches:
-      - develop
+  #pull_request:
+  #  branches:
+  #    - develop
+  #push:
+  #  branches:
+  #    - develop
 
 env:
   REGISTRY: quay.io
