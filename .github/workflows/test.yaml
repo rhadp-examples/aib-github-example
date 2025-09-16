@@ -1,0 +1,127 @@
+name: build autosd image
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: "${{ vars.REGISTRY }}"
+  REGISTRY_ORG: "${{ vars.REGISTRY_ORG }}"
+  
+  WORK_DIR: "/mnt/data/workspace"
+  IMAGE_DIR: "/mnt/data/images"
+  AIB_DIR: "/mnt/data/aib"
+
+  # AIB parameters
+  MANIFEST_FILE: simple.aib.yml
+
+  AIB_DISTRO: autosd9  # autosd cs9
+  AIB_ARCH: aarch64 # aarch64 x86_64
+  AIB_TARGET: qemu # rpi4 qemu
+  AIB_MODE: package # package image
+  AIB_EXPORT_FORMAT: qcow2 # image qcow2 container
+
+  CACHESIZE: "2GB"
+  BUILD_NAME: "output"
+  BUILDER_IMAGE: quay.io/centos-sig-automotive/automotive-osbuild:latest
+
+  # import secrets
+  ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+
+  # S3 bucket
+  ARTEFACT_BUCKET: "${{ vars.ARTEFACT_BUCKET }}"
+
+jobs:
+  build-autosd-image:
+    runs-on:
+      group: aib-runners
+      labels: [self-hosted, Linux, ARM64, aib]
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # prepare the environment
+      
+      - name: get version
+        run: |
+          VERSION="$(git rev-parse --short HEAD)"
+          VERSION=${VERSION#v} # remove the leading v prefix for version
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}"
+
+      - name: create directories
+        run: |
+          # create the image directory
+          mkdir -p ${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY
+
+          # cache directory
+          CACHE_DIR="${{ env.WORK_DIR }}/$GITHUB_REPOSITORY/.cache"
+          mkdir -p $CACHE_DIR
+
+          # create the temporary build directory used by AIB
+          BUILD_DIR="${{ env.WORK_DIR }}/$GITHUB_REPOSITORY/${{ env.VERSION }}"
+          mkdir -p $BUILD_DIR
+
+          echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
+          echo "CACHE_DIR=${CACHE_DIR}" >> $GITHUB_ENV
+          echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
+
+      - name: set image tags
+        id: set-tags
+        run: |
+          TAGS="${{ env.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: login to the registry
+        run: |
+          podman login ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }} \
+            --username ${{ secrets.REGISTRY_USERNAME }} \
+            --password ${{ secrets.REGISTRY_TOKEN }}
+
+      # build the container
+
+      
+
+      # build the image
+
+      - name: write the manifest
+        uses: elieahd/templater@v1
+        with:
+          template: manifests/${{ env.MANIFEST_FILE }}
+          file: ${{ env.BUILD_DIR }}/${{ env.MANIFEST_FILE }}
+          variables: "WORKSPACE=$GITHUB_WORKSPACE VERSION=${{ env.VERSION }} ROOT_PASSWORD=${{ env.ROOT_PASSWORD }}"
+
+      - name: build the OS image
+        run: |
+          CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
+          FQN_BUILD_NAME=$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}
+                                             
+          echo "CANONICAL_BUILD_NAME=${CANONICAL_BUILD_NAME}" >> $GITHUB_ENV
+          echo "FQN_BUILD_NAME=${FQN_BUILD_NAME}" >> $GITHUB_ENV
+
+      - name: upload artefact
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          source_dir: "${{ env.PODMAN_AUTH_FILE }}"
+          destination_dir: "$GITHUB_REPOSITORY"
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: ${{ env.ARTEFACT_BUCKET }}
+
+      # cleanup
+
+      - name: cleanup
+        run: |
+          podman logout ${{ env.REGISTRY }} \
+            --authfile ${{ env.PODMAN_AUTH_FILE }}
+
+          sudo rm -rf ${{ env.BUILD_DIR }}
