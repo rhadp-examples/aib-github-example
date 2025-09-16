@@ -64,7 +64,7 @@ jobs:
           echo "VERSION=${VERSION}"
 
       - name: install dependencies
-        run |
+        run: |
           pip install -r .scripts/requirements.txt
 
       - name: create directories
@@ -129,7 +129,7 @@ jobs:
       #    aws_bucket: ${{ env.ARTEFACT_BUCKET }}
 
       - name: upload artefacts
-        run |
+        run: |
           aws s3 cp "${{ env.PODMAN_AUTH_FILE }}" "s3://${{ env.ARTEFACT_BUCKET }}/$GITHUB_REPOSITORY"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
