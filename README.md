@@ -22,6 +22,8 @@ Build AutoSD with GitHub Actions
 | ROOT_PASSWORD       | Repository   | Actions | ***  |
 
 
+Prepare the builder private key:
+
 ```shell
 # base64 encode the private key
 base64 -i $HOME/.ssh/rhadp-vm

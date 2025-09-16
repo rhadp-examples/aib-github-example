@@ -9,5 +9,5 @@
             }
         }
     },
-    "postCreateCommand": "mkdir -p ~/.ssh && echo $BUILDER_PRIVATE_KEY > ~/.ssh/pkf && base64 -d ~/.ssh/pkf > ~/.ssh/builder-private-key && chmod 600 ~/.ssh/builder-private-key && rm ~/.ssh/pkf"
+    "postCreateCommand": "mkdir -p ~/.ssh && echo $BUILDER_PRIVATE_KEY > ~/.ssh/pkf && base64 -d -i ~/.ssh/pkf > ~/.ssh/builder-private-key && chmod 600 ~/.ssh/builder-private-key && rm ~/.ssh/pkf"
 }
