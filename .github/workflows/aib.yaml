@@ -4,10 +4,10 @@ on:
 
   pull_request:
     branches:
-      - develop2
+      - develop
   push:
     branches:
-      - develop2
+      - develop
 
 env:
   REGISTRY: "${{ vars.REGISTRY }}"
@@ -62,6 +62,10 @@ jobs:
           VERSION=${VERSION#v} # remove the leading v prefix for version
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}"
+
+      - name: install dependencies
+        run: |
+          pip install -r .scripts/requirements.txt
 
       - name: create directories
         run: |
@@ -138,14 +142,12 @@ jobs:
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
             && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$FQN_BUILD_NAME"
 
-      - name: upload artefact
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          source_dir: "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
-          destination_dir: "${{ env.FQN_BUILD_NAME }}"
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_bucket: ${{ env.ARTEFACT_BUCKET }}
+      - name: upload OS image
+        run: |
+          aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ env.ARTEFACT_BUCKET }}/$GITHUB_REPOSITORY/${{ env.FQN_BUILD_NAME }}"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       # cleanup
 
