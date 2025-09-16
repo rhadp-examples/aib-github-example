@@ -118,7 +118,7 @@ jobs:
       - name: upload artefact
         uses: shallwefootball/s3-upload-action@master
         with:
-          source_dir: "${{ env.PODMAN_AUTH_FILE }}"
+          source_dir: "${{ env.BUILD_DIR }}"
           destination_dir: "$GITHUB_REPOSITORY"
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
