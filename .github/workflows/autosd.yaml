@@ -170,14 +170,18 @@ jobs:
 
       - name: upload OS image
         run: |
-          aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ vars.ARTEFACT_BUCKET }}/$GITHUB_REPOSITORY/${{ env.FQN_BUILD_NAME }}"
+          aws s3 cp "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}" "s3://${{ vars.ARTEFACT_BUCKET }}/${{ env.FQN_BUILD_NAME }}"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           
       # cleanup
 
-      - name: cleanup
+      - name: remove OS image
+        run: |
+          rm "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
+
+      - name: logout of the registry
         run: |
           podman logout ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
