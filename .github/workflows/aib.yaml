@@ -110,6 +110,10 @@ jobs:
       - name: build the OS image
         run: |
           CANONICAL_BUILD_NAME="${{ env.AIB_DISTRO }}-${{ env.AIB_TARGET }}-${{ env.VERSION }}.${{ env.AIB_ARCH }}"
+          FQN_BUILD_NAME=$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}
+                                             
+          echo "CANONICAL_BUILD_NAME=${CANONICAL_BUILD_NAME}" >> $GITHUB_ENV
+          echo "FQN_BUILD_NAME=${FQN_BUILD_NAME}" >> $GITHUB_ENV
 
           OSBUILD_CMD="automotive-image-builder/automotive-image-builder \
             --verbose build \
@@ -132,13 +136,13 @@ jobs:
             -v "$GITHUB_WORKSPACE":"$GITHUB_WORKSPACE" \
             ${{ env.BUILDER_IMAGE }} \
             /bin/bash -c "cd ${{ env.AIB_DIR }}; $OSBUILD_CMD" \
-            && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+            && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$FQN_BUILD_NAME"
 
       - name: upload artefact
         uses: shallwefootball/s3-upload-action@master
         with:
-          source_dir: "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
-          destination_dir: "$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+          source_dir: "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
+          destination_dir: "${{ env.FQN_BUILD_NAME }}"
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_bucket: ${{ env.ARTEFACT_BUCKET }}
