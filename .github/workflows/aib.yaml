@@ -10,8 +10,8 @@ on:
       - develop
 
 env:
-  #REGISTRY: quay.io
-  #REGISTRY_ORG: quay.io/rhadp-examples
+  REGISTRY: "${{ vars.REGISTRY }}"
+  REGISTRY_ORG: "${{ vars.REGISTRY_ORG }}"
   
   WORK_DIR: "/mnt/data/workspace"
   IMAGE_DIR: "/mnt/data/images"
@@ -32,6 +32,9 @@ env:
 
   # import secrets
   ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+
+  # S3 bucket
+  ARTEFACT_BUCKET: "${{ vars.ARTEFACT_BUCKET }}"
 
 jobs:
   build-autosd-image:
