@@ -137,7 +137,6 @@ jobs:
       - name: upload artefact
         uses: shallwefootball/s3-upload-action@master
         with:
-          command: cp
           source_dir: "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
           destination_dir: "$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
