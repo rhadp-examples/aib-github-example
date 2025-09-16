@@ -135,14 +135,14 @@ jobs:
             && mv "${{ env.BUILD_DIR }}/${{ env.BUILD_NAME }}.${{ env.AIB_EXPORT_FORMAT }}" "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
 
       - name: upload artefact
-        uses: keithweaver/aws-s3-github-action@v1.0.0
+        uses: shallwefootball/s3-upload-action@master
         with:
           command: cp
-          source: "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
-          destination: "s3://${{ env.ARTEFACT_BUCKET }}//$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          source_dir: "${{ env.IMAGE_DIR }}/$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+          destination_dir: "$GITHUB_REPOSITORY/$CANONICAL_BUILD_NAME.${{ env.AIB_EXPORT_FORMAT }}"
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: ${{ secrets.AWS_S3_REGION }}
+          aws_bucket: ${{ env.ARTEFACT_BUCKET }}
 
       # cleanup
 
