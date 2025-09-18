@@ -1,0 +1,27 @@
+# Each .aib-ci.yml file needs at minimum a 'default' section
+
+default:
+  # the name of the artifact
+  name: radioapp
+  
+  # how to build the artifact
+  manifest: manifests/radioapp.aib.yml
+
+  # list of parameters for the automotive-image-builder
+  spec:
+    distro: autosd9  # autosd cs9
+    arch: aarch64 # aarch64 x86_64
+    target: qemu # rpi4 qemu
+    mode: package # package image
+    export_format: qcow2 # image qcow2 container
+
+# overrides the above configuration for various code branches
+
+develop:
+  spec:
+    target: qemu
+    
+main:
+  spec:
+    target: qemu
+    

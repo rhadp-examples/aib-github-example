@@ -17,7 +17,7 @@ components:
       # environment variables
       env:
         - name: JUMPSTARTER_GRPC_ENDPOINT
-          value: "jumpstarter-grpc.rhadp-jumpstarter.svc.cluster.local" # alternative: "https://grpc.rhadp.<cluster_base_domain>"
+          value: "grpc.rhadp-jumpstarter.apps.CLUSTER_BASE_DOMAIN"
 commands:
   - id: init-workspace
     exec:
