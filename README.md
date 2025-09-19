@@ -8,8 +8,8 @@ GitHub CodeSpaces, GitHub Actions and the Red Hat Automotive Development Platfor
 The sample application is a simple `radio-service` that emulates a radio, regularly publishing information about the current track, the radio station, and volume level. 
 The `radio-client` application connects to the radio service and requests to turn it on/off, to change the radio station, and adjust the volume.
 
-It demonstrates how typical automotive applications use https://some-ip.com/[SOME/IP,window=_blank] to communicate. 
-The application is written in C++ and uses the https://cmake.org/[CMake,window=_blank] build system.
+It demonstrates how typical automotive applications use [SOME/IP](https://some-ip.com,window=_blank) to communicate. 
+The application is written in C++ and uses the [CMake](https://cmake.org,window=_blank) build system.
 
 
 ## Getting started
