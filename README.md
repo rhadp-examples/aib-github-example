@@ -1,35 +1,31 @@
 # aib-github-example
 
-Build AutoSD with GitHub Actions
+## Overview 
 
-## Secrets and Variables
+In this example you will learn how to develop, build, and test a simple automotive application using 
+GitHub CodeSpaces, GitHub Actions and the Red Hat Automotive Development Platform (RHADP).
 
-### Variables
+The sample application is a simple `radio-service` that emulates a radio, regularly publishing information about the current track, the radio station, and volume level. 
+The `radio-client` application connects to the radio service and requests to turn it on/off, to change the radio station, and adjust the volume.
 
-| Name     | Scope    | Usage    | Default |
-|----------|----------|----------|----------|
-| REGISTRY        | Organization   | Actions | quay.io  |
-| REGISTRY_ORG    | Organization   | Actions | quay.io/rhadp-examples2  |
-| ARTEFACT_BUCKET | Repository     | Actions | *** |
-| JUMPSTARTER_GRPC_ENDPOINT | Organization   | Actions, Codespaces, Dev Spaces | https://grpc.rhadp...  |
+It demonstrates how typical automotive applications use https://some-ip.com/[SOME/IP,window=_blank] to communicate. 
+The application is written in C++ and uses the https://cmake.org/[CMake,window=_blank] build system.
 
 
-### Secrets
+## Getting started
 
-| Name     | Scope    | Usage    | Default |
-|----------|----------|----------|----------|
-| REGISTRY_USERNAME   | Organization   | Actions | ***  |
-| REGISTRY_TOKEN      | Organization   | Actions | ***  |
-| BUILDER_PRIVATE_KEY | Organization   | Actions, Codespaces | *** |
-| ROOT_PASSWORD       | Repository     | Actions | ***  |
-| AWS_ACCESS_KEY_ID     | Organization | Actions | ***  |
-| AWS_SECRET_ACCESS_KEY | Organization | Actions | ***  |
-| AWS_S3_REGION         | Organization | Actions | ***  |
+In order to use this example, you have to prepare your GitHub environment by creating a set of variables and secrets.
+Follow the steps described in the [setup guide](docs/setup.md).
+
+A complete step-by-step walkthrough of how to use this example is [here](docs/README.md).
 
 
-Store the VM private key as a secret on the `Organization` and `Codespaces` level:
+## Contributing
 
-```shell
-gh secret set BUILDER_PRIVATE_KEY < $HOME/.ssh/rhadp-vm -a codespaces && \
-gh secret set BUILDER_PRIVATE_KEY --visibility all < $HOME/.ssh/rhadp-vm -o rhadp-examples
-```
+Fork the repository and submit a pull request.
+
+## Development
+
+A list of ideas, open issues etc related to the Red Hat Automotive Development Platform (RHADP) is [here](https://github.com/orgs/rhadp/projects/1).  
+
+Also check the [Issues](https://github.com/rhadp-examples/aib-rhadp-example/issues) section of the this repository.
