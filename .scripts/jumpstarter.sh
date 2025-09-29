@@ -1,3 +1,4 @@
+NAMESPACE="rhadp-jumpstarter"
 USER=`oc whoami`
 
 # generate jumpstarter user config
@@ -8,5 +9,10 @@ config:
   current-client: $USER
 EOF
 
+if oc get client $USER -n $NAMESPACE &>/dev/null; then
+  echo "Client $USER already exists, deleting it first..."
+  oc delete client $USER -n $NAMESPACE || true
+fi
+
 # generate jumpstarter client config
-jmp admin create client $USER -n rhadp-jumpstarter --save --unsafe --insecure-tls-config --nointeractive --out /home/user/.config/jumpstarter/clients/$USER.yaml
+jmp admin create client $USER -n $NAMESPACE --save --unsafe --insecure-tls-config --nointeractive --out /home/user/.config/jumpstarter/clients/$USER.yaml
