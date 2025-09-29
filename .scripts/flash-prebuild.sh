@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/prebuilt/autosd9-qemu.qcow2"
+
+echo "Flashing image ${URL}"
+set -x
+j flasher flash "${URL}"
+set +x
+echo "Flashed image ${URL}"
