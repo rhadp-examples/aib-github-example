@@ -10,6 +10,27 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+# demo script
+
 oc login ..
 
 USER=`oc whoami`
+
+.scripts/jumpstarter.sh
+
+jmp get exporters
+
+jmp shell --client developer --selector platform=qemu-arm
+
+j power off
+
+.scripts/flash-prebuilt.sh
+
+j power on && j console start-console
+
+root
+password
+
+uname -m
+
+3x ctrl-b
