@@ -1,4 +1,4 @@
-FROM quay.io/rhadp/codespaces:latest
+FROM quay.io/mickume/codespaces:latest
 
 RUN dnf install -y socat vsomeip3 vsomeip3-devel vsomeip3-routingmanager dlt-daemon dlt-tools dlt-libs dlt-libs-devel && \
     dnf install -y boost-devel boost-system boost-thread boost-log boost-chrono boost-date-time boost-atomic boost-filesystem boost-regex && \

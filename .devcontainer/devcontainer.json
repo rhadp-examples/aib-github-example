@@ -1,5 +1,5 @@
 {
-    "image": "quay.io/rhadp/codespaces:latest",
+    "image": "quay.io/mickume/codespaces:latest",
     "remoteUser": "user",
     "customizations": {
         "vscode": {
