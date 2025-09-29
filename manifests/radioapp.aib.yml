@@ -23,7 +23,7 @@ content:
     - vim
 
   container_images:
-    - source: quay.io/rhadp-examples/radio-app
+    - source: quay.io/mickume/radio-app
       tag: "{{VERSION}}"
       name: localhost/app
 
