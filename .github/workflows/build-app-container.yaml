@@ -114,7 +114,7 @@ jobs:
         with:
           subject-name: ${{ vars.REGISTRY_ORG }}/radio-app
           subject-digest: ${{ env.DIGEST }}
-          push-to-registry: true
+          #push-to-registry: true
 
       # cleanup
 
