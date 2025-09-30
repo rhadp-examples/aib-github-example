@@ -98,7 +98,7 @@ jobs:
 
       # build the container
 
-      - name: build the container
+      - name: build the app container
         run: |
           buildah bud -f "src/Containerfile" \
             --tag ${{ steps.set-tags.outputs.tags }} \
@@ -178,13 +178,12 @@ jobs:
           
       # cleanup
 
-      - name: remove the OS image
-        run: |
-          rm "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
-
       - name: logout of the registry
         run: |
           podman logout ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
+      - name: remove artefacts and directories
+        run: |
+          rm "${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}"
           sudo rm -rf ${{ env.BUILD_DIR }}

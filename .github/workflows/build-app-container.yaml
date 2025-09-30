@@ -109,4 +109,6 @@ jobs:
           podman logout ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }}
 
+      - name: remove artefacts and directories
+        run: |
           sudo rm -rf ${{ env.BUILD_DIR }}
