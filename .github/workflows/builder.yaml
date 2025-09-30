@@ -1,4 +1,4 @@
-name: builder base image
+name: build base image
 on:
   workflow_dispatch:
   
@@ -106,6 +106,6 @@ jobs:
       - name: generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ vars.REGISTRY_ORG }}/${{ matrix.name }}
+          subject-name: ${{ vars.REGISTRY_ORG }}/${{ env.NAME_PREFIX }}-${{ matrix.name }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
