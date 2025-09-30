@@ -178,7 +178,7 @@ jobs:
           
       - name: create a digest
         run: |
-          DIGEST="sha256:`sha256sum ${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}`"
+          DIGEST="sha256:$(sha256sum ${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }} | cut -d' ' -f1)"
           echo "DIGEST=$DIGEST" >> $GITHUB_ENV
           echo $DIGEST
 
