@@ -178,14 +178,15 @@ jobs:
           
       - name: create a digest
         run: |
-          DIGEST=`sha256sum ${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}`
+          DIGEST="sha256:`sha256sum ${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}`"
           echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+          echo $DIGEST
 
       - name: generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ env.FQN_BUILD_NAME }}
-          subject-digest: "sha256:${{ env.DIGEST }}"
+          subject-name: ${{ env.CANONICAL_BUILD_NAME }}
+          subject-digest: ${{ env.DIGEST }}
 
       # cleanup
 
