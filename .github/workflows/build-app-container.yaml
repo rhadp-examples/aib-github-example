@@ -82,7 +82,8 @@ jobs:
       - name: push the container to the registry
         run: |
           podman push ${{ steps.set-tags.outputs.tags }} \
-            --authfile ${{ env.PODMAN_AUTH_FILE }}
+            --authfile ${{ env.PODMAN_AUTH_FILE }} \
+            --digestfile=${{ env.PODMAN_DIGEST_FILE }}
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             TAGS="${{ vars.REGISTRY_ORG }}/radio-app:latest"
@@ -100,8 +101,7 @@ jobs:
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
             podman push $TAGS \
-              --authfile ${{ env.PODMAN_AUTH_FILE }} \
-              --digestfile=${{ env.PODMAN_DIGEST_FILE }}
+              --authfile ${{ env.PODMAN_AUTH_FILE }} 
           fi
           
       - name: debug
