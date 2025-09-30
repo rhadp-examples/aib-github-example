@@ -48,10 +48,10 @@ jobs:
       - name: set image tags
         id: set-tags
         run: |
-          TAGS="${{ vars.REGISTRY_ORG }}/${{ envs.NAME_PREFIX }}-${{ matrix.name }}:${{ env.VERSION }}"
+          TAGS="${{ vars.REGISTRY_ORG }}/${{ env.NAME_PREFIX }}-${{ matrix.name }}:${{ env.VERSION }}"
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="$TAGS,${{ vars.REGISTRY_ORG }}/${{ envs.NAME_PREFIX }}-${{ matrix.name }}:latest"
+            TAGS="$TAGS,${{ vars.REGISTRY_ORG }}/${{ env.NAME_PREFIX }}-${{ matrix.name }}:latest"
           fi
 
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
