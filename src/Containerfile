@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 quay.io/rhadp-examples/application:latest
+FROM --platform=linux/arm64 quay.io/mickume/radio-app-builder:latest
 
 COPY . /opt/src
 
