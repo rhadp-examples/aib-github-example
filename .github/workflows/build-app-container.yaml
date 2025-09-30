@@ -85,9 +85,6 @@ jobs:
             --authfile ${{ env.PODMAN_AUTH_FILE }} \
             --digestfile=${{ env.PODMAN_DIGEST_FILE }}
 
-          DIGEST=$(cat ${{ env.PODMAN_DIGEST_FILE }})
-          echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
-
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             TAGS="${{ vars.REGISTRY_ORG }}/radio-app:latest"
             
@@ -107,10 +104,10 @@ jobs:
               --authfile ${{ env.PODMAN_AUTH_FILE }} 
           fi
           
-      #- name: debug
-      #  run: |
-      #    DIGEST=$(cat ${{ env.PODMAN_DIGEST_FILE }})
-      #    echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
+      - name: slurp the digest
+        run: |
+          DIGEST=$(cat ${{ env.PODMAN_DIGEST_FILE }})
+          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
           
       - name: generate artifact attestation
         uses: actions/attest-build-provenance@v1
