@@ -1,10 +1,10 @@
-name: build the base container image
+name: builder image
 on:
   workflow_dispatch:
   
-#  push:
-#    branches:
-#      - 'main'
+  push:
+    branches:
+      - 'main'
 
 env:
   BASENAME: "radio-app"
@@ -48,8 +48,11 @@ jobs:
       - name: set image tags
         id: set-tags
         run: |
-          #TAGS="${{ vars.REGISTRY_ORG }}/${{ env.BASENAME }}-${{ matrix.name }}:${{ env.VERSION }}"
-          TAGS="${{ vars.REGISTRY_ORG }}/${{ matrix.name }}:latest"
+          TAGS="${{ vars.REGISTRY_ORG }}/${{ matrix.name }}:${{ env.VERSION }}"
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TAGS="$TAGS,${{ vars.REGISTRY_ORG }}/${{ matrix.name }}:latest"
+          fi
           
           if [[ "${{ github.ref }}" == refs/heads/release-* ]]; then
             RELEASE_BRANCH_NAME=$(basename "${{ github.ref }}")

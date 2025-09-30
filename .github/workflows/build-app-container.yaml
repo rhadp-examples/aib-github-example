@@ -1,4 +1,4 @@
-name: build application container
+name: build radio-app
 on:
   workflow_dispatch:
 
