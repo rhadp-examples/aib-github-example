@@ -54,6 +54,7 @@ jobs:
 
           echo "BUILD_DIR=${BUILD_DIR}" >> $GITHUB_ENV
           echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
+          echo "PODMAN_DIGEST_FILE=${BUILD_DIR}/digest.txt" >> $GITHUB_ENV
 
       - name: set image tags
         id: set-tags
@@ -99,9 +100,17 @@ jobs:
             podman tag ${{ steps.set-tags.outputs.tags }} $TAGS
             
             podman push $TAGS \
-              --authfile ${{ env.PODMAN_AUTH_FILE }}
+              --authfile ${{ env.PODMAN_AUTH_FILE }} \
+              --digestfile=${{ env.PODMAN_DIGEST_FILE }}
           fi
           
+      - name: generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ vars.REGISTRY_ORG }}/${{ matrix.name }}
+          subject-digest: $(cat ${{ env.PODMAN_DIGEST_FILE }})
+          push-to-registry: true
+
       # cleanup
 
       - name: logout of the registry
