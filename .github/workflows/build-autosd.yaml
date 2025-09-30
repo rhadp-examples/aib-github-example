@@ -176,6 +176,17 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           
+      - name: create a digest
+        run: |
+          DIGEST=`sha256sum ${{ env.IMAGE_DIR }}/${{ env.FQN_BUILD_NAME }}`
+          echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+
+      - name: generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.FQN_BUILD_NAME }}
+          subject-digest: ${{ env.DIGEST }}
+
       # cleanup
 
       - name: logout of the registry
