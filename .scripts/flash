@@ -2,11 +2,12 @@
 set -euo pipefail
 
 # https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/autosd9-qemu-6d79ee5.aarch64.qcow2
+# autosd9-qemu-ce4b4c2.aarch64.qcow2
 
-REV=$(git rev-parse HEAD)
-URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/${{ values.owner }}-${{ values.component_id }}/${REV}_autosd9-qemu.qcow2"
+URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/$1"
 
 echo "Flashing image ${URL}"
+exit 0
 set -x
 j flasher flash "${URL}"
 set +x
