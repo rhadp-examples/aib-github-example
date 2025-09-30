@@ -104,6 +104,13 @@ jobs:
               --digestfile=${{ env.PODMAN_DIGEST_FILE }}
           fi
           
+      - name: debug
+        run: |
+          cat ${{ env.PODMAN_DIGEST_FILE }}
+
+          DIGEST=$(cat ${{ env.PODMAN_DIGEST_FILE }})
+          echo $DIGEST
+          
       - name: generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
