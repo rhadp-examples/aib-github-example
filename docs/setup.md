@@ -1,4 +1,4 @@
-## GitHub setup
+# GitHub setup
 
 ## Secrets and Variables
 
@@ -34,7 +34,7 @@ Define the following secrets:
 Building assets (app, containers, OS image) happens on self-hosted GitHub Runner instances. The runner instances are deployed on a Red Hat OpenShift cluster, on ARM nodes. 
 In order to deploy the runner instances, a `Runner group` must be created on the GitHub organization level.
 
-Create the runner group: [aib-runners](https://github.com/organizations/rhadp-examples/settings/actions/runner-groups)
+Define the following runner group: [aib-runners](https://github.com/organizations/rhadp-examples/settings/actions/runner-groups)
 
 <!-- 
 #### VM
