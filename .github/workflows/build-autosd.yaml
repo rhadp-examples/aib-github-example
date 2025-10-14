@@ -24,7 +24,7 @@ env:
   AIB_DISTRO: autosd9  # autosd cs9
   AIB_ARCH: aarch64 # aarch64 x86_64
   AIB_TARGET: qemu # rpi4 qemu
-  AIB_MODE: package # package image
+  AIB_MODE: image # package image
   AIB_EXPORT_FORMAT: qcow2 # image qcow2 container
 
   CACHESIZE: "2GB"

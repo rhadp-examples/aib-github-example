@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/autosd9-qemu-6d79ee5.aarch64.qcow2
-# autosd9-qemu-ce4b4c2.aarch64.qcow2
+GIT_REF=`git rev-parse --short=7 HEAD`
+OS_IMAGE="autosd9-qemu-$GIT_REF.aarch64.qcow2"
 
-URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/$1"
+URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/$OS_IMAGE"
 
 echo "Flashing image ${URL}"
 exit 0
