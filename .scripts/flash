@@ -6,9 +6,9 @@ OS_IMAGE="autosd9-qemu-$GIT_REF.aarch64.qcow2"
 
 URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/$OS_IMAGE"
 
-echo "Flashing image ${URL}"
+echo "Flashing image $URL"
 exit 0
 set -x
-j flasher flash "${URL}"
+j flasher flash $URL
 set +x
-echo "Flashed image ${URL}"
+echo "Flashed image $URL"

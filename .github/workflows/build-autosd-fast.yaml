@@ -79,12 +79,12 @@ jobs:
           echo "CACHE_DIR=${CACHE_DIR}" >> $GITHUB_ENV
           echo "PODMAN_AUTH_FILE=${BUILD_DIR}/auth.json" >> $GITHUB_ENV
 
-      - name: set image tags
-        id: set-tags
-        run: |
-          TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
-
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+      #- name: set image tags
+      #  id: set-tags
+      #  run: |
+      #    TAGS="${{ vars.REGISTRY_ORG }}/radio-app:${{ env.VERSION }}"
+      #
+      #    echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: login to the registry
         run: |
