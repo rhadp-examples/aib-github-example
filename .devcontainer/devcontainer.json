@@ -9,5 +9,5 @@
             }
         }
     },
-    "postCreateCommand": "/home/tooling/.scripts/init-workspace && .scripts/setup-workspace.sh"
+    "postCreateCommand": "/home/tooling/.scripts/init-workspace && .devcontainer/setup-workspace.sh"
 }
