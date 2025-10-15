@@ -2,12 +2,12 @@ name: build radio-app
 on:
   workflow_dispatch:
 
-  pull_request:
-    branches:
-      - develop
-  push:
-    branches:
-      - develop
+  #pull_request:
+  #  branches:
+  #    - develop
+  #push:
+  #  branches:
+  #    - develop
 
 env:
   # working dirs

@@ -2,9 +2,9 @@ name: build base image
 on:
   workflow_dispatch:
   
-  push:
-    branches:
-      - 'main'
+  #push:
+  #  branches:
+  #    - 'main'
 
 env:
   NAME_PREFIX: "radio-app"
