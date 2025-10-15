@@ -18,6 +18,12 @@ components:
       env:
         - name: JUMPSTARTER_GRPC_ENDPOINT
           value: "grpc.rhadp-jumpstarter.apps.CLUSTER_BASE_DOMAIN"
+  - name: vscode-extensions
+    attributes:
+      vscode:extensions:
+        - ms-vscode.cpptools
+        - ms-vscode.cmake-tools
+        - twxs.cmake
 commands:
   - id: init-workspace
     exec:

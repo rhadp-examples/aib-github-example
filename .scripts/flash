@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export PYTHONWARNINGS="ignore"
 
 GIT_REF=`git rev-parse --short=7 HEAD`
 OS_IMAGE="autosd9-qemu-$GIT_REF.aarch64.qcow2"
@@ -7,8 +8,8 @@ OS_IMAGE="autosd9-qemu-$GIT_REF.aarch64.qcow2"
 URL="https://rhadp-aib-cdn.s3.us-east-2.amazonaws.com/rhadp-examples/aib-github-example/$OS_IMAGE"
 
 echo "Flashing image $URL"
-exit 0
-set -x
+
 j flasher flash $URL
 set +x
+
 echo "Flashed image $URL"

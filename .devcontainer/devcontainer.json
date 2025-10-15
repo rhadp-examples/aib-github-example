@@ -6,8 +6,13 @@
             "settings": {
                 "cmake.sourceDirectory": "${workspaceFolder}/src",
                 "cmake.buildDirectory": "${workspaceFolder}/build"
-            }
+            },
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "twxs.cmake"
+            ]
         }
     },
-    "postCreateCommand": "/home/tooling/.scripts/init-workspace && .devcontainer/setup-workspace.sh"
+    "postCreateCommand": "/home/tooling/.scripts/init-workspace"
 }
