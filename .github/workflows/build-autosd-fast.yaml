@@ -1,4 +1,4 @@
-name: build autosd image
+name: build autosd image - fast
 on:
   workflow_dispatch:
 
@@ -32,7 +32,7 @@ env:
   ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
 
 jobs:
-  build-autosd-image:
+  build-autosd-image-fast:
     runs-on:
       group: aib-runners
       labels: [self-hosted, Linux, ARM64, aib]
