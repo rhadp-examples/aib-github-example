@@ -1,7 +1,7 @@
 # Development Environment Recommendations (TODO)
 
 ## .devcontainer/devcontainer.json
-- Uses custom image: `quay.io/mickume/codespaces:latest` (tailored for RHADP/automotive dev)
+- Uses custom image: `ghcr.io/rhadp/codespaces:latest` (tailored for RHAS/automotive dev)
 - Sets `remoteUser` to `user`
 - CMake source: `src`, build: `build`
 - Runs `/home/tooling/.scripts/init-workspace` after container creation

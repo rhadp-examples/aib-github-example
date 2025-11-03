@@ -94,7 +94,7 @@ jobs:
           podman login ${{ vars.REGISTRY }} \
             --authfile ${{ env.PODMAN_AUTH_FILE }} \
             --username ${{ secrets.REGISTRY_USERNAME }} \
-            --password ${{ secrets.REGISTRY_TOKEN }}
+            --password ${{ secrets.GH_TOKEN }}
 
       # build the container
 

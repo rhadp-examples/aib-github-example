@@ -23,7 +23,7 @@ content:
     - vim
 
   #container_images:
-  #  - source: quay.io/mickume/radio-app
+  #  - source: ghcr.io/rhadp/radio-app
   #    tag: "{{VERSION}}"
   #    name: localhost/app
 

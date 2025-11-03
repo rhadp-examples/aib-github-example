@@ -8,7 +8,7 @@ metadata:
 components:
   - name: runtime
     container:
-      image: quay.io/mickume/codespaces:latest
+      image: ghcr.io/rhadp/codespaces:latest
       memoryLimit: "4Gi"
       memoryRequest: "1Gi"
       cpuLimit: "4"
